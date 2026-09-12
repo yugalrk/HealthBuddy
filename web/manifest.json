@@ -1,11 +1,11 @@
 {
-    "name": "healthbuddy",
-    "short_name": "healthbuddy",
+    "name": "HealthBuddy",
+    "short_name": "HealthBuddy",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Weekly meal and shopping planner for Indian households",
+    "background_color": "#2E7D52",
+    "theme_color": "#2E7D52",
+    "description": "Weekly meal and shopping planner for Indian households.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
