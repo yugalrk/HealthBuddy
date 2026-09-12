@@ -21,8 +21,8 @@ void main(List<String> args) {
   final seed = args.isEmpty ? 3 : int.parse(args.first);
 
   final data = FoodData.parse(
-    ingredientsJson: File('lib/data/seed/ingredients.json').readAsStringSync(),
-    recipesJson: File('lib/data/seed/recipes.json').readAsStringSync(),
+    ingredientsJson: File('assets/seed/ingredients.json').readAsStringSync(),
+    recipesJson: File('assets/seed/recipes.json').readAsStringSync(),
   );
 
   final issues = data.validate();

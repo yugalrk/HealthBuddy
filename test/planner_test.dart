@@ -13,8 +13,8 @@ import 'package:healthbuddy/models/profile.dart';
 /// so these run headlessly.
 FoodData loadSeed() => FoodData.parse(
       ingredientsJson:
-          File('lib/data/seed/ingredients.json').readAsStringSync(),
-      recipesJson: File('lib/data/seed/recipes.json').readAsStringSync(),
+          File('assets/seed/ingredients.json').readAsStringSync(),
+      recipesJson: File('assets/seed/recipes.json').readAsStringSync(),
     );
 
 HouseholdMember adult({

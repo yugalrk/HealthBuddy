@@ -11,8 +11,8 @@ import 'package:healthbuddy/models/profile.dart';
 
 void main() {
   final data = FoodData.parse(
-    ingredientsJson: File('lib/data/seed/ingredients.json').readAsStringSync(),
-    recipesJson: File('lib/data/seed/recipes.json').readAsStringSync(),
+    ingredientsJson: File('assets/seed/ingredients.json').readAsStringSync(),
+    recipesJson: File('assets/seed/recipes.json').readAsStringSync(),
   );
 
   final profile = Profile(
