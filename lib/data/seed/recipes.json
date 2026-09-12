@@ -1,0 +1,2879 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "quantities": "Ingredient qty is in the ingredient's base unit (g or ml) for the stated `servings` count.",
+    "roles": {
+      "complete": "Eaten on its own — typical breakfast or one-dish meal.",
+      "main": "The protein centre of a lunch or dinner - dal, paneer, egg or meat.",
+      "staple": "Roti / rice. `scalable: true` means the planner may vary the portion to close the day's energy gap.",
+      "side": "Curd, salad, small accompaniment.",
+      "sabzi": "A vegetable dish accompanying the main. Never the protein source, so it cannot replace a `main`."
+    },
+    "diet": "veg < egg < nonveg. A user's diet setting admits every level at or below it.",
+    "slots": [
+      "breakfast",
+      "lunch",
+      "dinner",
+      "snack"
+    ]
+  },
+  "recipes": [
+    {
+      "id": "poha",
+      "name": "Poha",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 20,
+      "tags": [
+        "quick",
+        "light"
+      ],
+      "ingredients": [
+        {
+          "id": "poha",
+          "qty": 120
+        },
+        {
+          "id": "onion",
+          "qty": 60
+        },
+        {
+          "id": "potato",
+          "qty": 80
+        },
+        {
+          "id": "peanuts",
+          "qty": 30
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "rai",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "curry_patta",
+          "qty": 2
+        },
+        {
+          "id": "nimbu",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "upma",
+      "name": "Rava Upma",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 25,
+      "tags": [
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "rava",
+          "qty": 120
+        },
+        {
+          "id": "onion",
+          "qty": 60
+        },
+        {
+          "id": "carrot",
+          "qty": 50
+        },
+        {
+          "id": "matar",
+          "qty": 40
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "rai",
+          "qty": 3
+        },
+        {
+          "id": "urad_dal",
+          "qty": 5
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "curry_patta",
+          "qty": 2
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "besan_chilla",
+      "name": "Besan Chilla",
+      "role": "complete",
+      "slots": [
+        "breakfast",
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 20,
+      "tags": [
+        "high-protein",
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "besan",
+          "qty": 120
+        },
+        {
+          "id": "onion",
+          "qty": 50
+        },
+        {
+          "id": "tomato",
+          "qty": 50
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 10
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "moong_chilla",
+      "name": "Moong Dal Chilla",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 30,
+      "tags": [
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "moong_dal",
+          "qty": 120
+        },
+        {
+          "id": "onion",
+          "qty": 50
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "ginger",
+          "qty": 5
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "idli",
+      "name": "Idli with Sambar",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 30,
+      "tags": [
+        "fermented",
+        "light"
+      ],
+      "ingredients": [
+        {
+          "id": "idli_rava",
+          "qty": 100
+        },
+        {
+          "id": "urad_dal",
+          "qty": 40
+        },
+        {
+          "id": "toor_dal",
+          "qty": 50
+        },
+        {
+          "id": "onion",
+          "qty": 40
+        },
+        {
+          "id": "tomato",
+          "qty": 50
+        },
+        {
+          "id": "lauki",
+          "qty": 60
+        },
+        {
+          "id": "imli",
+          "qty": 10
+        },
+        {
+          "id": "oil",
+          "qty": 10
+        },
+        {
+          "id": "rai",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "curry_patta",
+          "qty": 2
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "dosa",
+      "name": "Dosa with Chutney",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 30,
+      "tags": [
+        "fermented"
+      ],
+      "ingredients": [
+        {
+          "id": "rice_raw",
+          "qty": 100
+        },
+        {
+          "id": "urad_dal",
+          "qty": 40
+        },
+        {
+          "id": "peanuts",
+          "qty": 30
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "rai",
+          "qty": 3
+        },
+        {
+          "id": "curry_patta",
+          "qty": 2
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "oats_porridge",
+      "name": "Oats Porridge with Banana & Almonds",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 10,
+      "tags": [
+        "quick",
+        "high-fibre"
+      ],
+      "ingredients": [
+        {
+          "id": "oats",
+          "qty": 80
+        },
+        {
+          "id": "milk",
+          "qty": 300
+        },
+        {
+          "id": "banana",
+          "qty": 120
+        },
+        {
+          "id": "almonds",
+          "qty": 20
+        },
+        {
+          "id": "sugar",
+          "qty": 10
+        }
+      ]
+    },
+    {
+      "id": "ragi_porridge",
+      "name": "Ragi Porridge",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 15,
+      "tags": [
+        "high-calcium"
+      ],
+      "ingredients": [
+        {
+          "id": "ragi",
+          "qty": 80
+        },
+        {
+          "id": "milk",
+          "qty": 300
+        },
+        {
+          "id": "sugar",
+          "qty": 15
+        },
+        {
+          "id": "almonds",
+          "qty": 15
+        }
+      ]
+    },
+    {
+      "id": "aloo_paratha",
+      "name": "Aloo Paratha with Curd",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 35,
+      "tags": [
+        "heavy"
+      ],
+      "ingredients": [
+        {
+          "id": "atta",
+          "qty": 150
+        },
+        {
+          "id": "potato",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 40
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 10
+        },
+        {
+          "id": "ghee",
+          "qty": 20
+        },
+        {
+          "id": "curd",
+          "qty": 150
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "paneer_paratha",
+      "name": "Paneer Paratha with Curd",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 35,
+      "tags": [
+        "high-protein",
+        "heavy"
+      ],
+      "ingredients": [
+        {
+          "id": "atta",
+          "qty": 150
+        },
+        {
+          "id": "paneer",
+          "qty": 150
+        },
+        {
+          "id": "onion",
+          "qty": 40
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "ghee",
+          "qty": 20
+        },
+        {
+          "id": "curd",
+          "qty": 150
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "egg_bhurji",
+      "name": "Egg Bhurji with Toast",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "egg",
+      "servings": 2,
+      "prepMin": 15,
+      "tags": [
+        "high-protein",
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "egg",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 60
+        },
+        {
+          "id": "tomato",
+          "qty": 60
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "oil",
+          "qty": 10
+        },
+        {
+          "id": "bread_brown",
+          "qty": 80
+        },
+        {
+          "id": "haldi",
+          "qty": 1
+        },
+        {
+          "id": "salt",
+          "qty": 3
+        }
+      ]
+    },
+    {
+      "id": "boiled_eggs_toast",
+      "name": "Boiled Eggs with Toast & Fruit",
+      "role": "complete",
+      "slots": [
+        "breakfast"
+      ],
+      "diet": "egg",
+      "servings": 2,
+      "prepMin": 12,
+      "tags": [
+        "high-protein",
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "egg",
+          "qty": 200
+        },
+        {
+          "id": "bread_brown",
+          "qty": 80
+        },
+        {
+          "id": "butter",
+          "qty": 10
+        },
+        {
+          "id": "apple",
+          "qty": 150
+        }
+      ]
+    },
+    {
+      "id": "sprouts_salad",
+      "name": "Moong Sprouts Salad",
+      "role": "complete",
+      "slots": [
+        "breakfast",
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 15,
+      "tags": [
+        "high-protein",
+        "light",
+        "no-cook"
+      ],
+      "ingredients": [
+        {
+          "id": "moong_dal",
+          "qty": 100
+        },
+        {
+          "id": "onion",
+          "qty": 40
+        },
+        {
+          "id": "tomato",
+          "qty": 50
+        },
+        {
+          "id": "cucumber",
+          "qty": 60
+        },
+        {
+          "id": "nimbu",
+          "qty": 15
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 3
+        }
+      ]
+    },
+    {
+      "id": "dal_tadka",
+      "name": "Dal Tadka",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "protein",
+        "everyday"
+      ],
+      "ingredients": [
+        {
+          "id": "toor_dal",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 80
+        },
+        {
+          "id": "tomato",
+          "qty": 100
+        },
+        {
+          "id": "ghee",
+          "qty": 20
+        },
+        {
+          "id": "jeera",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "mirch",
+          "qty": 3
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 4
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "ginger",
+          "qty": 8
+        },
+        {
+          "id": "hing",
+          "qty": 1
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "moong_dal_fry",
+      "name": "Moong Dal Fry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 25,
+      "tags": [
+        "protein",
+        "light"
+      ],
+      "ingredients": [
+        {
+          "id": "moong_dal",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 70
+        },
+        {
+          "id": "tomato",
+          "qty": 90
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "ginger",
+          "qty": 8
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 6
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "masoor_dal",
+      "name": "Masoor Dal",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 25,
+      "tags": [
+        "protein",
+        "high-iron"
+      ],
+      "ingredients": [
+        {
+          "id": "masoor_dal",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 80
+        },
+        {
+          "id": "tomato",
+          "qty": 100
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "mirch",
+          "qty": 3
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "chana_dal_lauki",
+      "name": "Chana Dal with Lauki",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 40,
+      "tags": [
+        "protein",
+        "high-fibre"
+      ],
+      "ingredients": [
+        {
+          "id": "chana_dal",
+          "qty": 180
+        },
+        {
+          "id": "lauki",
+          "qty": 250
+        },
+        {
+          "id": "onion",
+          "qty": 70
+        },
+        {
+          "id": "tomato",
+          "qty": 90
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 4
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "rajma_masala",
+      "name": "Rajma Masala",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 50,
+      "tags": [
+        "protein",
+        "high-fibre",
+        "weekend"
+      ],
+      "ingredients": [
+        {
+          "id": "rajma",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 120
+        },
+        {
+          "id": "tomato",
+          "qty": 150
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "ginger",
+          "qty": 10
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "jeera",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "mirch",
+          "qty": 4
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 5
+        },
+        {
+          "id": "garam_masala",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "chole",
+      "name": "Chole",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 50,
+      "tags": [
+        "protein",
+        "high-fibre",
+        "weekend"
+      ],
+      "ingredients": [
+        {
+          "id": "kabuli_chana",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 120
+        },
+        {
+          "id": "tomato",
+          "qty": 150
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "ginger",
+          "qty": 10
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 5
+        },
+        {
+          "id": "mirch",
+          "qty": 4
+        },
+        {
+          "id": "imli",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "kala_chana_curry",
+      "name": "Kala Chana Curry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 45,
+      "tags": [
+        "protein",
+        "high-iron"
+      ],
+      "ingredients": [
+        {
+          "id": "kala_chana",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "oil",
+          "qty": 18
+        },
+        {
+          "id": "jeera",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 5
+        },
+        {
+          "id": "garam_masala",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "lobia_curry",
+      "name": "Lobia Curry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 40,
+      "tags": [
+        "protein"
+      ],
+      "ingredients": [
+        {
+          "id": "lobia",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "oil",
+          "qty": 18
+        },
+        {
+          "id": "ginger",
+          "qty": 8
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 5
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "soya_curry",
+      "name": "Soya Chunk Curry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "soya_chunks",
+          "qty": 120
+        },
+        {
+          "id": "onion",
+          "qty": 120
+        },
+        {
+          "id": "tomato",
+          "qty": 150
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "ginger",
+          "qty": 10
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "mirch",
+          "qty": 4
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "paneer_bhurji",
+      "name": "Paneer Bhurji",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 20,
+      "tags": [
+        "high-protein",
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "paneer",
+          "qty": 300
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "capsicum",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 18
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "mirch",
+          "qty": 3
+        },
+        {
+          "id": "garam_masala",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "palak_paneer",
+      "name": "Palak Paneer",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 35,
+      "tags": [
+        "high-protein",
+        "high-calcium"
+      ],
+      "ingredients": [
+        {
+          "id": "paneer",
+          "qty": 250
+        },
+        {
+          "id": "palak",
+          "qty": 400
+        },
+        {
+          "id": "onion",
+          "qty": 80
+        },
+        {
+          "id": "tomato",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 18
+        },
+        {
+          "id": "ginger",
+          "qty": 8
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "garam_masala",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "matar_paneer",
+      "name": "Matar Paneer",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 35,
+      "tags": [
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "paneer",
+          "qty": 250
+        },
+        {
+          "id": "matar",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 150
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "ginger",
+          "qty": 8
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "kadhi",
+      "name": "Besan Kadhi",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 35,
+      "tags": [
+        "protein",
+        "comfort"
+      ],
+      "ingredients": [
+        {
+          "id": "besan",
+          "qty": 100
+        },
+        {
+          "id": "curd",
+          "qty": 400
+        },
+        {
+          "id": "onion",
+          "qty": 60
+        },
+        {
+          "id": "oil",
+          "qty": 18
+        },
+        {
+          "id": "rai",
+          "qty": 4
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "hing",
+          "qty": 1
+        },
+        {
+          "id": "curry_patta",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "sambar",
+      "name": "Sambar",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 40,
+      "tags": [
+        "protein",
+        "high-fibre"
+      ],
+      "ingredients": [
+        {
+          "id": "toor_dal",
+          "qty": 180
+        },
+        {
+          "id": "lauki",
+          "qty": 150
+        },
+        {
+          "id": "carrot",
+          "qty": 80
+        },
+        {
+          "id": "beans_french",
+          "qty": 80
+        },
+        {
+          "id": "onion",
+          "qty": 70
+        },
+        {
+          "id": "tomato",
+          "qty": 100
+        },
+        {
+          "id": "imli",
+          "qty": 15
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "rai",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "curry_patta",
+          "qty": 3
+        },
+        {
+          "id": "hing",
+          "qty": 1
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "egg_curry",
+      "name": "Egg Curry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "egg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "egg",
+          "qty": 300
+        },
+        {
+          "id": "onion",
+          "qty": 120
+        },
+        {
+          "id": "tomato",
+          "qty": 150
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "ginger",
+          "qty": 10
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "mirch",
+          "qty": 4
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "chicken_curry",
+      "name": "Chicken Curry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "nonveg",
+      "servings": 4,
+      "prepMin": 45,
+      "tags": [
+        "high-protein",
+        "weekend"
+      ],
+      "ingredients": [
+        {
+          "id": "chicken_curry_cut",
+          "qty": 600
+        },
+        {
+          "id": "onion",
+          "qty": 150
+        },
+        {
+          "id": "tomato",
+          "qty": 150
+        },
+        {
+          "id": "curd",
+          "qty": 100
+        },
+        {
+          "id": "oil",
+          "qty": 25
+        },
+        {
+          "id": "ginger",
+          "qty": 15
+        },
+        {
+          "id": "garlic",
+          "qty": 15
+        },
+        {
+          "id": "garam_masala",
+          "qty": 5
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "mirch",
+          "qty": 5
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 5
+        },
+        {
+          "id": "salt",
+          "qty": 6
+        }
+      ]
+    },
+    {
+      "id": "grilled_chicken",
+      "name": "Grilled Chicken Breast",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "nonveg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "high-protein",
+        "lean"
+      ],
+      "ingredients": [
+        {
+          "id": "chicken_breast",
+          "qty": 600
+        },
+        {
+          "id": "curd",
+          "qty": 100
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "ginger",
+          "qty": 10
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "nimbu",
+          "qty": 20
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "mirch",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "fish_curry",
+      "name": "Fish Curry",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "nonveg",
+      "servings": 4,
+      "prepMin": 35,
+      "tags": [
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "fish_rohu",
+          "qty": 600
+        },
+        {
+          "id": "onion",
+          "qty": 120
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "oil",
+          "qty": 25
+        },
+        {
+          "id": "ginger",
+          "qty": 10
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "haldi",
+          "qty": 4
+        },
+        {
+          "id": "mirch",
+          "qty": 4
+        },
+        {
+          "id": "rai",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "aloo_gobi",
+      "name": "Aloo Gobi",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "sabzi"
+      ],
+      "ingredients": [
+        {
+          "id": "gobi",
+          "qty": 400
+        },
+        {
+          "id": "potato",
+          "qty": 200
+        },
+        {
+          "id": "onion",
+          "qty": 80
+        },
+        {
+          "id": "tomato",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 4
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "bhindi_masala",
+      "name": "Bhindi Masala",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 25,
+      "tags": [
+        "sabzi"
+      ],
+      "ingredients": [
+        {
+          "id": "bhindi",
+          "qty": 500
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "dhania_powder",
+          "qty": 4
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "baingan_bharta",
+      "name": "Baingan Bharta",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 40,
+      "tags": [
+        "sabzi"
+      ],
+      "ingredients": [
+        {
+          "id": "baingan",
+          "qty": 500
+        },
+        {
+          "id": "onion",
+          "qty": 120
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "garlic",
+          "qty": 12
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 6
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "methi_aloo",
+      "name": "Methi Aloo",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 25,
+      "tags": [
+        "sabzi",
+        "high-calcium"
+      ],
+      "ingredients": [
+        {
+          "id": "methi",
+          "qty": 300
+        },
+        {
+          "id": "potato",
+          "qty": 250
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "mix_veg",
+      "name": "Mixed Vegetable Sabzi",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "sabzi",
+        "high-fibre"
+      ],
+      "ingredients": [
+        {
+          "id": "gobi",
+          "qty": 150
+        },
+        {
+          "id": "carrot",
+          "qty": 120
+        },
+        {
+          "id": "beans_french",
+          "qty": 120
+        },
+        {
+          "id": "matar",
+          "qty": 100
+        },
+        {
+          "id": "potato",
+          "qty": 120
+        },
+        {
+          "id": "onion",
+          "qty": 80
+        },
+        {
+          "id": "tomato",
+          "qty": 100
+        },
+        {
+          "id": "oil",
+          "qty": 20
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "garam_masala",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "cabbage_matar",
+      "name": "Cabbage Matar Sabzi",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 20,
+      "tags": [
+        "sabzi",
+        "light",
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "patta_gobi",
+          "qty": 400
+        },
+        {
+          "id": "matar",
+          "qty": 120
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "hari_mirch",
+          "qty": 5
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "lauki_sabzi",
+      "name": "Lauki Sabzi",
+      "role": "sabzi",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 20,
+      "tags": [
+        "sabzi",
+        "light"
+      ],
+      "ingredients": [
+        {
+          "id": "lauki",
+          "qty": 500
+        },
+        {
+          "id": "tomato",
+          "qty": 100
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "hing",
+          "qty": 1
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "palak_moong",
+      "name": "Palak Moong Dal",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "protein",
+        "high-iron"
+      ],
+      "ingredients": [
+        {
+          "id": "moong_dal",
+          "qty": 180
+        },
+        {
+          "id": "palak",
+          "qty": 300
+        },
+        {
+          "id": "onion",
+          "qty": 70
+        },
+        {
+          "id": "tomato",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "roti",
+      "name": "Roti",
+      "role": "staple",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 15,
+      "scalable": true,
+      "portionUnit": "roti",
+      "tags": [
+        "staple"
+      ],
+      "ingredients": [
+        {
+          "id": "atta",
+          "qty": 40
+        },
+        {
+          "id": "oil",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "bajra_roti",
+      "name": "Bajra Roti",
+      "role": "staple",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 18,
+      "scalable": true,
+      "portionUnit": "roti",
+      "tags": [
+        "staple",
+        "high-iron"
+      ],
+      "ingredients": [
+        {
+          "id": "bajra",
+          "qty": 45
+        },
+        {
+          "id": "oil",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "jowar_roti",
+      "name": "Jowar Roti",
+      "role": "staple",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 18,
+      "scalable": true,
+      "portionUnit": "roti",
+      "tags": [
+        "staple",
+        "gluten-free"
+      ],
+      "ingredients": [
+        {
+          "id": "jowar",
+          "qty": 45
+        },
+        {
+          "id": "oil",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "rice_plain",
+      "name": "Steamed Rice",
+      "role": "staple",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 20,
+      "scalable": true,
+      "portionUnit": "katori",
+      "tags": [
+        "staple"
+      ],
+      "ingredients": [
+        {
+          "id": "rice_raw",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "id": "brown_rice_plain",
+      "name": "Steamed Brown Rice",
+      "role": "staple",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 30,
+      "scalable": true,
+      "portionUnit": "katori",
+      "tags": [
+        "staple",
+        "high-fibre"
+      ],
+      "ingredients": [
+        {
+          "id": "brown_rice",
+          "qty": 60
+        }
+      ]
+    },
+    {
+      "id": "jeera_rice",
+      "name": "Jeera Rice",
+      "role": "staple",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 25,
+      "scalable": true,
+      "portionUnit": "katori",
+      "tags": [
+        "staple"
+      ],
+      "ingredients": [
+        {
+          "id": "rice_raw",
+          "qty": 60
+        },
+        {
+          "id": "ghee",
+          "qty": 4
+        },
+        {
+          "id": "jeera",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "curd_side",
+      "name": "Curd",
+      "role": "side",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 2,
+      "tags": [
+        "side",
+        "probiotic",
+        "high-calcium"
+      ],
+      "ingredients": [
+        {
+          "id": "curd",
+          "qty": 100
+        }
+      ]
+    },
+    {
+      "id": "kachumber",
+      "name": "Kachumber Salad",
+      "role": "side",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 8,
+      "tags": [
+        "side",
+        "no-cook",
+        "high-fibre"
+      ],
+      "ingredients": [
+        {
+          "id": "cucumber",
+          "qty": 70
+        },
+        {
+          "id": "tomato",
+          "qty": 50
+        },
+        {
+          "id": "onion",
+          "qty": 30
+        },
+        {
+          "id": "nimbu",
+          "qty": 8
+        },
+        {
+          "id": "salt",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "id": "roasted_chana_snack",
+      "name": "Roasted Chana",
+      "role": "complete",
+      "slots": [
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 2,
+      "tags": [
+        "snack",
+        "high-protein",
+        "no-cook"
+      ],
+      "ingredients": [
+        {
+          "id": "kala_chana",
+          "qty": 40
+        }
+      ]
+    },
+    {
+      "id": "peanut_chaat",
+      "name": "Peanut Chaat",
+      "role": "complete",
+      "slots": [
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 10,
+      "tags": [
+        "snack",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "peanuts",
+          "qty": 60
+        },
+        {
+          "id": "onion",
+          "qty": 40
+        },
+        {
+          "id": "tomato",
+          "qty": 40
+        },
+        {
+          "id": "nimbu",
+          "qty": 10
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 8
+        },
+        {
+          "id": "salt",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "curd_banana_snack",
+      "name": "Curd with Banana & Almonds",
+      "role": "complete",
+      "slots": [
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 3,
+      "tags": [
+        "snack",
+        "high-calcium",
+        "no-cook"
+      ],
+      "ingredients": [
+        {
+          "id": "curd",
+          "qty": 150
+        },
+        {
+          "id": "banana",
+          "qty": 100
+        },
+        {
+          "id": "almonds",
+          "qty": 15
+        }
+      ]
+    },
+    {
+      "id": "fruit_snack",
+      "name": "Seasonal Fruit",
+      "role": "complete",
+      "slots": [
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 1,
+      "prepMin": 2,
+      "tags": [
+        "snack",
+        "no-cook",
+        "light"
+      ],
+      "ingredients": [
+        {
+          "id": "papaya",
+          "qty": 150
+        },
+        {
+          "id": "apple",
+          "qty": 100
+        }
+      ]
+    },
+    {
+      "id": "sprouts_chaat_snack",
+      "name": "Sprouts Chaat",
+      "role": "complete",
+      "slots": [
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 10,
+      "tags": [
+        "snack",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "id": "moong_dal",
+          "qty": 80
+        },
+        {
+          "id": "onion",
+          "qty": 30
+        },
+        {
+          "id": "tomato",
+          "qty": 40
+        },
+        {
+          "id": "nimbu",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "tofu_bhurji",
+      "name": "Tofu Bhurji",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 20,
+      "tags": [
+        "high-protein",
+        "quick"
+      ],
+      "ingredients": [
+        {
+          "id": "tofu",
+          "qty": 400
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "capsicum",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "mirch",
+          "qty": 3
+        },
+        {
+          "id": "garam_masala",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "palak_tofu",
+      "name": "Palak Tofu",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "high-protein",
+        "high-iron",
+        "high-calcium"
+      ],
+      "ingredients": [
+        {
+          "id": "tofu",
+          "qty": 300
+        },
+        {
+          "id": "palak",
+          "qty": 400
+        },
+        {
+          "id": "onion",
+          "qty": 60
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "soya_keema",
+      "name": "Soya Keema Matar",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "high-protein",
+        "high-iron"
+      ],
+      "ingredients": [
+        {
+          "id": "soya_chunks",
+          "qty": 100
+        },
+        {
+          "id": "onion",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 120
+        },
+        {
+          "id": "matar",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 15
+        },
+        {
+          "id": "ginger",
+          "qty": 8
+        },
+        {
+          "id": "garlic",
+          "qty": 10
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "haldi",
+          "qty": 2
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "moong_soya_khichdi",
+      "name": "Moong Soya Khichdi",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 30,
+      "tags": [
+        "high-protein",
+        "comfort"
+      ],
+      "ingredients": [
+        {
+          "id": "moong_dal",
+          "qty": 120
+        },
+        {
+          "id": "rice_raw",
+          "qty": 100
+        },
+        {
+          "id": "soya_chunks",
+          "qty": 50
+        },
+        {
+          "id": "carrot",
+          "qty": 60
+        },
+        {
+          "id": "matar",
+          "qty": 50
+        },
+        {
+          "id": "ghee",
+          "qty": 12
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "haldi",
+          "qty": 3
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "masoor_soup",
+      "name": "Masoor Dal Soup",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 25,
+      "tags": [
+        "high-protein",
+        "light",
+        "high-iron"
+      ],
+      "ingredients": [
+        {
+          "id": "masoor_dal",
+          "qty": 150
+        },
+        {
+          "id": "tomato",
+          "qty": 100
+        },
+        {
+          "id": "onion",
+          "qty": 50
+        },
+        {
+          "id": "garlic",
+          "qty": 8
+        },
+        {
+          "id": "oil",
+          "qty": 8
+        },
+        {
+          "id": "jeera",
+          "qty": 3
+        },
+        {
+          "id": "nimbu",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 4
+        }
+      ]
+    },
+    {
+      "id": "paneer_tikka",
+      "name": "Paneer Tikka",
+      "role": "main",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "diet": "veg",
+      "servings": 4,
+      "prepMin": 35,
+      "tags": [
+        "high-protein",
+        "high-calcium"
+      ],
+      "ingredients": [
+        {
+          "id": "paneer",
+          "qty": 400
+        },
+        {
+          "id": "curd",
+          "qty": 100
+        },
+        {
+          "id": "capsicum",
+          "qty": 100
+        },
+        {
+          "id": "onion",
+          "qty": 80
+        },
+        {
+          "id": "oil",
+          "qty": 10
+        },
+        {
+          "id": "garam_masala",
+          "qty": 4
+        },
+        {
+          "id": "mirch",
+          "qty": 3
+        },
+        {
+          "id": "nimbu",
+          "qty": 15
+        },
+        {
+          "id": "salt",
+          "qty": 5
+        }
+      ]
+    },
+    {
+      "id": "hung_curd_bowl",
+      "name": "Hung Curd Bowl with Fruit",
+      "role": "complete",
+      "slots": [
+        "breakfast",
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 2,
+      "prepMin": 5,
+      "tags": [
+        "high-protein",
+        "high-calcium",
+        "no-cook"
+      ],
+      "ingredients": [
+        {
+          "id": "hung_curd",
+          "qty": 400
+        },
+        {
+          "id": "banana",
+          "qty": 100
+        },
+        {
+          "id": "almonds",
+          "qty": 20
+        }
+      ]
+    },
+    {
+      "id": "chana_sprout_salad",
+      "name": "Sprouted Chana Salad",
+      "role": "complete",
+      "slots": [
+        "breakfast",
+        "snack"
+      ],
+      "diet": "veg",
+      "servings": 3,
+      "prepMin": 12,
+      "tags": [
+        "high-protein",
+        "high-iron",
+        "no-cook"
+      ],
+      "ingredients": [
+        {
+          "id": "kala_chana",
+          "qty": 150
+        },
+        {
+          "id": "cucumber",
+          "qty": 100
+        },
+        {
+          "id": "tomato",
+          "qty": 80
+        },
+        {
+          "id": "onion",
+          "qty": 40
+        },
+        {
+          "id": "nimbu",
+          "qty": 12
+        },
+        {
+          "id": "dhania_patta",
+          "qty": 10
+        },
+        {
+          "id": "salt",
+          "qty": 3
+        }
+      ]
+    }
+  ]
+}
