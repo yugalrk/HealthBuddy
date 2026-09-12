@@ -130,8 +130,26 @@ Upload that `.aab` to the Play Console.
 
 | Artifact | Size | Note |
 |---|---|---|
-| `app-debug.apk` | 153 MB | all ABIs + debug symbols; sideloading only |
-| `app-release.aab` | 17.5 MB | what you upload; Play splits it per device |
+| `app-debug.apk` | 146 MB | all ABIs + debug symbols; sideloading only |
+| `app-release.aab` | 48.5 MB | what you upload |
+
+The `.aab` is **not** the download size. Roughly 66 MB of its uncompressed
+content is `BUNDLE-METADATA/com.android.tools.build.debugsymbols`, which Play
+keeps for crash symbolication and never ships to a device, and `base/lib`
+carries three ABIs of which each phone receives one. Expect an actual install
+of roughly 15-20 MB. Check the real figure on the Play Console release page
+before worrying about it.
+
+To trade crash symbolication for a smaller upload, add to the `android` block
+of `android/app/build.gradle.kts`:
+
+```kotlin
+buildTypes {
+    release {
+        ndk { debugSymbolLevel = "NONE" }
+    }
+}
+```
 
 The first Gradle build takes roughly 25 minutes because it downloads a 2.1 GB
 NDK. Later builds are minutes.
