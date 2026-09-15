@@ -45,8 +45,17 @@ class PlannedMeal {
   Nutrients nutrients(Map<String, Ingredient> byId) =>
       Nutrients.sum(components.map((c) => c.nutrients(byId)));
 
-  int get prepMin =>
-      components.fold(0, (a, c) => a + c.recipe.prepMin);
+  /// Raw quantity of each ingredient the whole meal needs, in base units,
+  /// summed across its dishes.
+  Map<String, double> ingredientQuantities() {
+    final out = <String, double>{};
+    for (final c in components) {
+      c.ingredientQuantities().forEach((id, q) {
+        out[id] = (out[id] ?? 0) + q;
+      });
+    }
+    return out;
+  }
 
   String get title => components.map((c) => c.recipe.name).join(' + ');
 

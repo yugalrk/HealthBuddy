@@ -126,6 +126,7 @@ class _MealRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final n = meal.nutrients(app.food.ingredients);
+    final amounts = _MealAmounts(meal, app.food.ingredients);
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -151,10 +152,16 @@ class _MealRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  for (final c in meal.components)
+                  for (final e in amounts.main)
+                    _AmountLine(
+                      name: e.ingredient.name,
+                      qty: formatCookQty(e.qty, e.ingredient.unit),
+                    ),
+                  if (amounts.flavour.isNotEmpty)
                     Text(
-                      '${c.recipe.name}  ${c.portionLabel()}',
-                      style: const TextStyle(fontSize: 14.5, height: 1.35),
+                      '+ ${amounts.flavour.length} spices & seasonings',
+                      style: TextStyle(
+                          fontSize: 12, color: scheme.onSurfaceVariant),
                     ),
                   const SizedBox(height: 4),
                   MacroRow(n: n, dense: true),
@@ -176,6 +183,55 @@ class _MealRow extends StatelessWidget {
   }
 }
 
+/// A meal's ingredients as amounts to cook, largest first.
+///
+/// Spices and seasonings are split out: at a few grams they carry no
+/// nutritional weight, and listing "2 g hing" beside "250 g atta" buries the
+/// amounts that actually decide whether the goal is met.
+class _MealAmounts {
+  _MealAmounts(PlannedMeal meal, Map<String, Ingredient> byId) {
+    final entries = [
+      for (final e in meal.ingredientQuantities().entries)
+        if (byId[e.key] != null) (ingredient: byId[e.key]!, qty: e.value),
+    ]..sort((a, b) => b.qty.compareTo(a.qty));
+    for (final e in entries) {
+      (e.ingredient.role == NutrientRole.flavour ? flavour : main).add(e);
+    }
+  }
+
+  final List<({Ingredient ingredient, double qty})> main = [];
+  final List<({Ingredient ingredient, double qty})> flavour = [];
+}
+
+class _AmountLine extends StatelessWidget {
+  const _AmountLine({required this.name, required this.qty, this.size = 14.5});
+  final String name;
+  final String qty;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          SizedBox(
+            width: 64,
+            child: Text(qty,
+                style: TextStyle(
+                    fontSize: size, fontWeight: FontWeight.w700, height: 1.35)),
+          ),
+          Expanded(
+            child: Text(name, style: TextStyle(fontSize: size, height: 1.35)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MealDetailSheet extends StatelessWidget {
   const _MealDetailSheet({required this.meal, required this.app});
   final PlannedMeal meal;
@@ -185,6 +241,8 @@ class _MealDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final ings = app.food.ingredients;
+    final amounts = _MealAmounts(meal, ings);
+    final people = app.profile.householdSize;
 
     return DraggableScrollableSheet(
       expand: false,
@@ -195,67 +253,46 @@ class _MealDetailSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         children: [
           Text(meal.type.label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
-                color: scheme.onSurfaceVariant,
-              )),
-          const SizedBox(height: 4),
-          Text(meal.title,
-              style:
-                  const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontSize: 22, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
-          Text('About ${meal.prepMin} minutes to cook',
-              style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13)),
+          Text(
+            'What to cook for ${people == 1 ? 'you' : 'all $people of you'} '
+            'to stay on track. Uncooked weights — cook it however you like.',
+            style: TextStyle(
+                color: scheme.onSurfaceVariant, fontSize: 13, height: 1.35),
+          ),
           const SizedBox(height: 16),
           MacroRow(n: meal.nutrients(ings)),
-          for (final c in meal.components) ...[
-            SectionHeader('${c.recipe.name} — ${c.portionLabel()}'),
-            Text(
-              'Cooked quantities for your household',
-              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+          const SectionHeader('Amounts'),
+          for (final e in amounts.main)
+            _AmountLine(
+              name: e.ingredient.name,
+              qty: formatCookQty(e.qty, e.ingredient.unit),
+              size: 14,
             ),
-            const SizedBox(height: 8),
-            ...(() {
-              final q = c.ingredientQuantities();
-              final entries = q.entries.toList()
-                ..sort((a, b) {
-                  final an = ings[a.key]?.name ?? a.key;
-                  final bn = ings[b.key]?.name ?? b.key;
-                  return an.compareTo(bn);
-                });
-              return [
-                for (final e in entries)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(ings[e.key]?.name ?? e.key,
-                              style: const TextStyle(fontSize: 14)),
-                        ),
-                        Text(
-                          _fmt(e.value, ings[e.key]?.unit ?? 'g'),
-                          style: TextStyle(
-                              fontSize: 14, color: scheme.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                  ),
-              ];
-            })(),
+          if (amounts.flavour.isNotEmpty) ...[
+            const SectionHeader('Spices & seasonings'),
+            Text(
+              amounts.flavour.map((e) => e.ingredient.name).join(', '),
+              style: TextStyle(
+                  fontSize: 13, height: 1.4, color: scheme.onSurfaceVariant),
+            ),
           ],
         ],
       ),
     );
   }
+}
 
-  static String _fmt(double qty, String unit) {
-    if (qty >= 1000) {
-      final v = qty / 1000;
-      return '${v.toStringAsFixed(v < 10 ? 2 : 1)} ${unit == 'ml' ? 'L' : 'kg'}';
-    }
-    return '${qty.round()} $unit';
+/// "250 g", "35 g", "1.2 kg" — rounded to what a kitchen scale or katori can
+/// sensibly measure rather than the solver's exact output.
+String formatCookQty(double qty, String unit) {
+  if (qty >= 1000) {
+    final v = qty / 1000;
+    return '${v.toStringAsFixed(v < 10 ? 1 : 0)} ${unit == 'ml' ? 'L' : 'kg'}';
   }
+  final step = qty < 20 ? 1 : (qty < 100 ? 5 : 10);
+  final rounded = (qty / step).round() * step;
+  return '${rounded < 1 ? '<1' : rounded} $unit';
 }
