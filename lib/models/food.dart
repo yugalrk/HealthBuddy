@@ -129,6 +129,33 @@ enum NutritionSource {
   }
 }
 
+/// What an ingredient is nutritionally *for*.
+///
+/// The shopping list is ultimately about having the right materials in the
+/// kitchen to cook balanced meals, so grouping by nutritional function tells
+/// you more than grouping by shop aisle does.
+enum NutrientRole {
+  protein('Protein foods', 'Dals, paneer, tofu, soya, egg and meat — the '
+      'hardest target to hit, and the reason the week is planned at all.'),
+  grain('Grains & staples', 'Atta, rice and millets. Your main source of '
+      'energy, and a real contributor of protein and iron in Indian diets.'),
+  vegetable('Vegetables', 'Fibre, folate and micronutrients. Variety matters '
+      'more here than quantity of any one vegetable.'),
+  fruit('Fruit', 'Fibre and vitamin C, which also helps you absorb iron from '
+      'the dals and greens in the same meal.'),
+  dairy('Dairy', 'Milk and curd carry most of your calcium.'),
+  nuts('Nuts & seeds', 'Concentrated protein, healthy fat and — for til and '
+      'almonds — a lot of calcium.'),
+  fat('Fats & oils', 'Energy density and fat-soluble vitamins. Needed, but '
+      'the easiest thing to overdo.'),
+  flavour('Flavour & spices', 'Little nutritional weight at the quantities '
+      'used, but they are what make the food worth eating.');
+
+  const NutrientRole(this.label, this.why);
+  final String label;
+  final String why;
+}
+
 class Ingredient {
   const Ingredient({
     required this.id,
@@ -169,6 +196,40 @@ class Ingredient {
   final String? note;
 
   Nutrients nutrientsFor(double qty) => per100 * (qty / 100.0);
+
+  /// Classify by what the ingredient mainly contributes.
+  ///
+  /// Aisle is the starting point, but protein density decides the dairy case:
+  /// paneer and tofu belong with the protein foods, milk and curd with the
+  /// calcium sources.
+  NutrientRole get role {
+    if (pantryStaple && (aisle == Aisle.spices || aisle == Aisle.vegetables)) {
+      return NutrientRole.flavour;
+    }
+    switch (aisle) {
+      case Aisle.pulses:
+      case Aisle.eggmeat:
+        return NutrientRole.protein;
+      case Aisle.dairy:
+        return per100.protein >= 12
+            ? NutrientRole.protein
+            : NutrientRole.dairy;
+      case Aisle.grains:
+        return NutrientRole.grain;
+      case Aisle.vegetables:
+        return NutrientRole.vegetable;
+      case Aisle.fruits:
+        return NutrientRole.fruit;
+      case Aisle.nuts:
+        return NutrientRole.nuts;
+      case Aisle.oils:
+        return NutrientRole.fat;
+      case Aisle.spices:
+        return NutrientRole.flavour;
+      case Aisle.other:
+        return NutrientRole.flavour;
+    }
+  }
 
   static Ingredient fromJson(Map<String, dynamic> j) {
     final p = j['per100'] as Map<String, dynamic>;

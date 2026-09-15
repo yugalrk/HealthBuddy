@@ -165,6 +165,102 @@ const double referenceServingKcal = 2000;
 double householdPortions(Profile p) =>
     householdDailyTargets(p).kcal / referenceServingKcal;
 
+/// A nutrient the app reports on, with the reasoning behind its figure.
+///
+/// Kept next to the calculations rather than in the UI so the explanation and
+/// the number can never drift apart.
+class NutrientGuide {
+  const NutrientGuide({
+    required this.label,
+    required this.unit,
+    required this.read,
+    required this.why,
+    required this.basis,
+  });
+
+  final String label;
+  final String unit;
+
+  /// Pulls this nutrient out of a [Nutrients] vector.
+  final double Function(Nutrients) read;
+
+  /// What it does, in one line.
+  final String why;
+
+  /// Where the recommended figure comes from.
+  final String basis;
+}
+
+/// The nutrients the app gives a recommended intake for, in reporting order.
+const List<NutrientGuide> nutrientGuides = [
+  NutrientGuide(
+    label: 'Energy',
+    unit: 'kcal',
+    read: _readKcal,
+    why: 'Total daily fuel. Too little and you lose muscle along with fat; '
+        'too much and the surplus is stored.',
+    basis: 'Mifflin-St Jeor equation from your height, weight, age and sex, '
+        'scaled by activity, then adjusted for your goal.',
+  ),
+  NutrientGuide(
+    label: 'Protein',
+    unit: 'g',
+    read: _readProtein,
+    why: 'Builds and repairs muscle and keeps you full. This is the target '
+        'most Indian households miss.',
+    basis: 'ICMR-NIN 2020: 0.83 g per kg body weight, raised to 1.0 g/kg on a '
+        'vegetarian cereal-based diet because its protein is less digestible. '
+        'Higher again for muscle gain or fat loss.',
+  ),
+  NutrientGuide(
+    label: 'Fat',
+    unit: 'g',
+    read: _readFat,
+    why: 'Carries fat-soluble vitamins and supplies essential fatty acids.',
+    basis: '25% of your energy, the midpoint of the ICMR-NIN 20-30% band.',
+  ),
+  NutrientGuide(
+    label: 'Carbohydrate',
+    unit: 'g',
+    read: _readCarb,
+    why: 'Your main working fuel, mostly from grains, dals and vegetables.',
+    basis: 'Whatever energy remains once protein and fat are set.',
+  ),
+  NutrientGuide(
+    label: 'Fibre',
+    unit: 'g',
+    read: _readFibre,
+    why: 'Digestion, blood sugar and cholesterol. Dals and whole grains are '
+        'the main sources.',
+    basis: '30 g per 2000 kcal — a density heuristic, as ICMR-NIN publishes no '
+        'single adult figure.',
+  ),
+  NutrientGuide(
+    label: 'Iron',
+    unit: 'mg',
+    read: _readIron,
+    why: 'Carries oxygen in the blood. Deficiency is common in India, '
+        'especially among women.',
+    basis: 'ICMR-NIN 2020: 19 mg for men, 29 mg for menstruating women. The '
+        'high figure reflects the low absorption of iron from Indian diets.',
+  ),
+  NutrientGuide(
+    label: 'Calcium',
+    unit: 'mg',
+    read: _readCalcium,
+    why: 'Bone strength, and it keeps mattering well past childhood.',
+    basis: 'ICMR-NIN 2020: 1000 mg for adults, 1200 mg over 60.',
+  ),
+];
+
+double _readKcal(Nutrients n) => n.kcal;
+double _readProtein(Nutrients n) => n.protein;
+double _readFat(Nutrients n) => n.fat;
+double _readCarb(Nutrients n) => n.carb;
+double _readFibre(Nutrients n) => n.fibre;
+double _readIron(Nutrients n) => n.iron;
+double _readCalcium(Nutrients n) => n.calcium;
+
 /// Per-member breakdown, for the "why these numbers" screen.
 class MemberTargets {
   const MemberTargets(this.member, this.targets, this.proteinGPerKg);

@@ -170,6 +170,10 @@ class AppState extends ChangeNotifier {
   Nutrients get weeklyTargets => householdWeeklyTargets(profile);
   Nutrients? get weeklyPlanned => _plan?.nutrients(food.ingredients);
 
+  /// Ingredients the household asked to avoid that the plan could not exclude.
+  Set<String> get unavoidable =>
+      _plan?.avoidedButPresent(profile.disliked) ?? const {};
+
   ShoppingList? get shoppingList => _plan == null
       ? null
       : buildShoppingList(

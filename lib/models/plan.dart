@@ -116,6 +116,17 @@ class WeekPlan {
     return out;
   }
 
+  /// Ingredients the household asked to avoid that the plan still contains.
+  ///
+  /// Normally empty. It is non-empty only when avoiding something would have
+  /// left a meal with nothing to cook — salt, for instance, appears in every
+  /// savoury recipe. The app shows this rather than quietly serving food
+  /// someone said they did not want.
+  Set<String> avoidedButPresent(Set<String> avoid) {
+    if (avoid.isEmpty) return const {};
+    return ingredientTotals().keys.where(avoid.contains).toSet();
+  }
+
   /// How often each recipe appears — drives the variety display.
   Map<String, int> recipeFrequency() {
     final out = <String, int>{};

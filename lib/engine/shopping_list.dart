@@ -29,6 +29,11 @@ class ShoppingItem {
   final int packs;
 
   Aisle get aisle => ingredient.aisle;
+  NutrientRole get role => ingredient.role;
+
+  /// Nutrients this item contributes to the week, based on the quantity the
+  /// cooking actually uses.
+  Nutrients get contribution => ingredient.nutrientsFor(neededQty);
 
   /// "750 g", "1.5 kg", "2 × 500 ml".
   String get quantityLabel => _formatQty(buyQty, ingredient.unit);
@@ -79,6 +84,68 @@ class ShoppingList {
   final List<Ingredient> excludedOwned;
 
   int get itemCount => toBuy.values.fold(0, (a, b) => a + b.length);
+
+  /// Every item in the list, buy-list and pantry check together.
+  Iterable<ShoppingItem> get allItems sync* {
+    for (final items in toBuy.values) {
+      yield* items;
+    }
+    yield* pantryCheck;
+  }
+
+  /// The same items grouped by what they nutritionally contribute, rather than
+  /// by shop aisle. This is the view that answers "why is this on my list?".
+  Map<NutrientRole, List<ShoppingItem>> get byNutrientRole {
+    final out = <NutrientRole, List<ShoppingItem>>{};
+    for (final item in allItems) {
+      (out[item.ingredient.role] ??= []).add(item);
+    }
+    for (final list in out.values) {
+      list.sort((a, b) => b.contribution.protein.compareTo(a.contribution.protein));
+    }
+    return out;
+  }
+
+  List<NutrientRole> get orderedRoles => NutrientRole.values
+      .where((r) => byNutrientRole[r]?.isNotEmpty ?? false)
+      .toList();
+
+  /// What the week's ingredients actually supply.
+  ///
+  /// Based on the quantities the cooking consumes, not the rounded-up pack
+  /// sizes — buying a 1 kg bag to use 750 g does not feed you 1 kg.
+  Nutrients get provides =>
+      Nutrients.sum(allItems.map((i) => i.contribution));
+
+  /// Supply as a fraction of what the household needs for the week.
+  Nutrients coverageAgainst(Nutrients weeklyNeed) => Nutrients(
+        kcal: _ratio(provides.kcal, weeklyNeed.kcal),
+        protein: _ratio(provides.protein, weeklyNeed.protein),
+        fat: _ratio(provides.fat, weeklyNeed.fat),
+        carb: _ratio(provides.carb, weeklyNeed.carb),
+        fibre: _ratio(provides.fibre, weeklyNeed.fibre),
+        iron: _ratio(provides.iron, weeklyNeed.iron),
+        calcium: _ratio(provides.calcium, weeklyNeed.calcium),
+      );
+
+  static double _ratio(double got, double need) => need <= 0 ? 1 : got / need;
+
+  /// Fraction of the week's protein that comes from cereals rather than from
+  /// dals, dairy, soya, egg or meat.
+  ///
+  /// Worth surfacing: in a typical Indian vegetarian week grains supply as much
+  /// protein as the dals do, and cereal protein is less digestible. A high
+  /// share here is the practical reason ICMR-NIN raises the requirement for
+  /// cereal-based diets, and it points at the fix — more dal, paneer or soya
+  /// rather than more roti.
+  double get cerealProteinShare {
+    final total = provides.protein;
+    if (total <= 0) return 0;
+    final cereal = allItems
+        .where((i) => i.ingredient.role == NutrientRole.grain)
+        .fold(0.0, (a, i) => a + i.contribution.protein);
+    return cereal / total;
+  }
 
   List<Aisle> get orderedAisles =>
       Aisle.values.where((a) => toBuy[a]?.isNotEmpty ?? false).toList();

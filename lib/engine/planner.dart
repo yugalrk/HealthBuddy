@@ -140,9 +140,13 @@ class MealPlanner {
     required List<Recipe> recipes,
     required this.ingredients,
     this.weights = const ScoreWeights(),
-  }) : recipes =
-            recipes.where((r) => _isEdible(r, profile, ingredients)).toList() {
-    for (final r in this.recipes) {
+  })  : recipes = recipes
+            .where((r) => _isEdible(r, profile, ingredients, avoidDisliked: true))
+            .toList(),
+        _lenient = recipes
+            .where((r) => _isEdible(r, profile, ingredients, avoidDisliked: false))
+            .toList() {
+    for (final r in _lenient) {
       final ids = r.ingredientIds.toList();
       var liked = 0;
       var disliked = 0;
@@ -160,26 +164,64 @@ class MealPlanner {
   }
 
   final Profile profile;
+
+  /// Recipes that satisfy every restriction, including things to avoid.
   final List<Recipe> recipes;
+
+  /// Same, but allowing avoided ingredients. Used only where honouring an
+  /// avoidance would leave a meal slot with nothing to cook.
+  final List<Recipe> _lenient;
+
   final Map<String, Ingredient> ingredients;
   final ScoreWeights weights;
 
   final Map<String, _RecipeStatic> _static = {};
+  final Map<(MealType, RecipeRole), List<Recipe>> _candidateCache = {};
 
-  /// Hard filter: diet type and allergens. Dislikes are soft (scored), because
-  /// excluding them outright can make a plan infeasible for a picky household.
+  /// Slot/role combinations where avoidances had to be relaxed to produce a
+  /// meal at all. Surfaced to the user rather than silently ignored.
+  final Set<RecipeRole> relaxedRoles = {};
+
+  /// Hard filter.
+  ///
+  /// Diet type and allergens are always absolute. Avoided ingredients are too
+  /// when [avoidDisliked] is set: if someone says they do not want brinjal,
+  /// a plan containing brinjal is simply wrong, however well it scores.
   static bool _isEdible(
-      Recipe r, Profile p, Map<String, Ingredient> ingredients) {
+    Recipe r,
+    Profile p,
+    Map<String, Ingredient> ingredients, {
+    required bool avoidDisliked,
+  }) {
     if (!p.diet.admits(r.diet)) return false;
     for (final id in r.ingredientIds) {
       if (p.allergens.contains(id)) return false;
+      if (avoidDisliked && p.disliked.contains(id)) return false;
     }
     return true;
   }
 
-  List<Recipe> _candidates(MealType slot, RecipeRole role) => recipes
-      .where((r) => r.role == role && r.slots.contains(slot))
-      .toList(growable: false);
+  /// Candidates for a slot, preferring recipes that honour every avoidance.
+  ///
+  /// Falls back to allowing avoided ingredients only when being strict would
+  /// leave nothing to cook — a household that avoids onion should still get
+  /// dinner. The fallback is recorded in [relaxedRoles] so the app can say so.
+  List<Recipe> _candidates(MealType slot, RecipeRole role) =>
+      _candidateCache[(slot, role)] ??= () {
+        final strict = recipes
+            .where((r) => r.role == role && r.slots.contains(slot))
+            .toList(growable: false);
+        if (strict.isNotEmpty || role == RecipeRole.sabzi ||
+            role == RecipeRole.side) {
+          // Sabzis and sides are optional, so an empty strict list is fine.
+          return strict;
+        }
+        final lenient = _lenient
+            .where((r) => r.role == role && r.slots.contains(slot))
+            .toList(growable: false);
+        if (lenient.isNotEmpty) relaxedRoles.add(role);
+        return lenient;
+      }();
 
   Nutrients _perServing(Recipe r) => _static[r.id]!.perServing;
 
