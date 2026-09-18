@@ -44,6 +44,132 @@ enum DietType {
   bool admits(DietType recipeDiet) => recipeDiet.index <= index;
 }
 
+/// Day names, indexed by weekday with 0 = Monday.
+const weekdayNames = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
+
+/// Foods commonly given up on a particular day of the week for religious or
+/// cultural reasons — no meat on Tuesdays, no onion or garlic on a fast day.
+enum AvoidGroup {
+  nonVeg('All non-veg', 'Meat, chicken, fish and eggs',
+      ['non-veg', 'nonveg', 'meat', 'mansahari']),
+  meat('Meat', 'Chicken, mutton and any other meat',
+      ['mutton', 'goat', 'lamb', 'gosht']),
+  chicken('Chicken', 'Only chicken', ['murga', 'murgh']),
+  fish('Fish & seafood', 'Fish, prawns and other seafood',
+      ['seafood', 'prawn', 'machli', 'machhli']),
+  egg('Eggs', 'Eggs in any form', ['anda', 'ande']),
+  dairy('Dairy', 'Milk, curd, paneer, butter and ghee',
+      ['diary', 'doodh', 'dahi', 'lactose', 'milk products']),
+  pulses('Dals & pulses', 'Dals, rajma, chana, soya and besan',
+      ['daal', 'lentil', 'legume', 'vrat', 'fast', 'navratri']),
+  grains('All grains', 'Rice, wheat, millets, oats, poha and bread',
+      ['anaj', 'cereal', 'millet', 'vrat', 'fast', 'navratri']),
+  riceWheat('Rice & wheat', 'Roti, rice, poha, sooji and bread',
+      ['chawal', 'gehun', 'atta', 'chapati']),
+  onionGarlic('Onion & garlic', 'Satvik cooking',
+      ['pyaz', 'pyaaz', 'lehsun', 'lahsun', 'sattvic', 'satvic']),
+  nuts('Nuts & seeds', 'Peanuts, almonds and til',
+      ['peanut', 'moongphali', 'badam', 'sesame']);
+
+  const AvoidGroup(this.label, this.description, this.aliases);
+  final String label;
+  final String description;
+
+  /// Other words people type for the group: Hindi names, common misspellings,
+  /// the occasion it is kept for.
+  final List<String> aliases;
+
+  /// Whether the group can appear at all on a [diet] — meat never reaches a
+  /// vegetarian plan, so there is nothing to avoid.
+  bool relevantTo(DietType diet) => switch (this) {
+        AvoidGroup.meat || AvoidGroup.chicken || AvoidGroup.fish =>
+          diet == DietType.nonveg,
+        AvoidGroup.nonVeg || AvoidGroup.egg => diet != DietType.veg,
+        _ => true,
+      };
+}
+
+/// A weekly observance: on these days, these people do not eat these things.
+///
+/// Meals are cooked once for the whole household, so the planner leaves the
+/// food out of everyone's meals that day. [memberIds] is kept so the app can
+/// say who the day is for.
+class DayRule {
+  const DayRule({
+    required this.memberIds,
+    required this.weekdays,
+    this.groups = const {},
+    this.ingredients = const {},
+  });
+
+  final Set<String> memberIds;
+
+  /// 0 = Monday.
+  final Set<int> weekdays;
+  final Set<AvoidGroup> groups;
+
+  /// Individual ingredient ids, for anything the groups do not cover.
+  final Set<String> ingredients;
+
+  bool get isEmpty =>
+      memberIds.isEmpty ||
+      weekdays.isEmpty ||
+      (groups.isEmpty && ingredients.isEmpty);
+
+  DayRule copyWith({Set<String>? memberIds}) => DayRule(
+        memberIds: memberIds ?? this.memberIds,
+        weekdays: weekdays,
+        groups: groups,
+        ingredients: ingredients,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'memberIds': memberIds.toList(),
+        'weekdays': weekdays.toList()..sort(),
+        'groups': groups.map((g) => g.name).toList(),
+        'ingredients': ingredients.toList(),
+      };
+
+  static DayRule fromJson(Map<String, dynamic> j) => DayRule(
+        memberIds: {...(j['memberIds'] as List).cast<String>()},
+        weekdays: {...(j['weekdays'] as List).cast<int>()},
+        groups: {
+          for (final g in (j['groups'] as List? ?? []).cast<String>())
+            AvoidGroup.values.byName(g)
+        },
+        ingredients: {...(j['ingredients'] as List? ?? []).cast<String>()},
+      );
+}
+
+/// How often the household buys fresh food, which decides how long perishables
+/// must last between shops.
+enum ShoppingRhythm {
+  weekly('Once a week', 'One big shop for everything.', [0]),
+  twice('Twice a week', 'A main shop, and fresh vegetables and dairy again '
+      'mid-week.', [0, 3]),
+  frequent('Every two days', 'The sabziwala or market every other day.',
+      [0, 2, 4, 6]);
+
+  const ShoppingRhythm(this.label, this.description, this.tripDays);
+  final String label;
+  final String description;
+
+  /// Day offsets into the week on which a shop happens. Day 0 is the day the
+  /// plan starts, when everything long-lasting is bought.
+  final List<int> tripDays;
+
+  /// The most recent shop on or before [day].
+  int tripFor(int day) => tripDays.lastWhere((t) => t <= day);
+}
+
 /// ICMR-NIN 2020 reference adult body weights, used to prefill household
 /// members whose exact measurements the user does not want to enter.
 const double referenceManKg = 65;
@@ -176,6 +302,8 @@ class Profile {
     this.allergens = const {},
     this.pantry = const {},
     this.includeSnacks = true,
+    this.dayRules = const [],
+    this.shopping = ShoppingRhythm.twice,
   });
 
   final List<HouseholdMember> members;
@@ -195,6 +323,15 @@ class Profile {
 
   final bool includeSnacks;
 
+  /// Foods given up on particular days of the week.
+  final List<DayRule> dayRules;
+
+  final ShoppingRhythm shopping;
+
+  /// Every rule that applies on [weekday] (0 = Monday).
+  Iterable<DayRule> rulesOn(int weekday) =>
+      dayRules.where((r) => r.weekdays.contains(weekday));
+
   int get householdSize => members.length;
 
   HouseholdMember get primary =>
@@ -208,6 +345,8 @@ class Profile {
     Set<String>? allergens,
     Set<String>? pantry,
     bool? includeSnacks,
+    List<DayRule>? dayRules,
+    ShoppingRhythm? shopping,
   }) =>
       Profile(
         members: members ?? this.members,
@@ -217,6 +356,8 @@ class Profile {
         allergens: allergens ?? this.allergens,
         pantry: pantry ?? this.pantry,
         includeSnacks: includeSnacks ?? this.includeSnacks,
+        dayRules: dayRules ?? this.dayRules,
+        shopping: shopping ?? this.shopping,
       );
 
   Map<String, dynamic> toJson() => {
@@ -227,6 +368,8 @@ class Profile {
         'allergens': allergens.toList(),
         'pantry': pantry.toList(),
         'includeSnacks': includeSnacks,
+        'dayRules': dayRules.map((r) => r.toJson()).toList(),
+        'shopping': shopping.name,
       };
 
   static Profile fromJson(Map<String, dynamic> j) => Profile(
@@ -239,5 +382,13 @@ class Profile {
         allergens: {...(j['allergens'] as List? ?? []).cast<String>()},
         pantry: {...(j['pantry'] as List? ?? []).cast<String>()},
         includeSnacks: j['includeSnacks'] as bool? ?? true,
+        dayRules: [
+          for (final r in (j['dayRules'] as List? ?? []))
+            DayRule.fromJson(r as Map<String, dynamic>)
+        ],
+        shopping: ShoppingRhythm.values
+                .where((s) => s.name == j['shopping'])
+                .firstOrNull ??
+            ShoppingRhythm.twice,
       );
 }

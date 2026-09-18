@@ -43,8 +43,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   late Set<String> _disliked;
   late Set<String> _allergens;
   late bool _includeSnacks;
+  late List<DayRule> _dayRules;
+  late ShoppingRhythm _shopping;
+  String _prefQuery = '';
 
-  int get _pageCount => widget.initial == null ? 7 : 6;
+  int get _pageCount => widget.initial == null ? 9 : 8;
 
   @override
   void initState() {
@@ -64,6 +67,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _disliked = {...init.disliked};
       _allergens = {...init.allergens};
       _includeSnacks = init.includeSnacks;
+      _dayRules = [...init.dayRules];
+      _shopping = init.shopping;
     } else {
       _age = 28;
       _sex = Sex.male;
@@ -77,6 +82,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _disliked = {};
       _allergens = {};
       _includeSnacks = true;
+      _dayRules = [];
+      _shopping = ShoppingRhythm.twice;
     }
   }
 
@@ -107,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _finish() {
     final primary = HouseholdMember(
-      id: 'primary',
+      id: widget.initial?.primary.id ?? 'primary',
       name: 'You',
       age: _age,
       sex: _sex,
@@ -117,14 +124,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       goal: _goal,
       isPrimary: true,
     );
-    widget.onComplete(Profile(
-      members: [primary, ..._others],
-      diet: _diet,
-      liked: _liked,
-      disliked: _disliked,
-      allergens: _allergens,
-      includeSnacks: _includeSnacks,
-    ));
+    widget.onComplete(
+      Profile(
+        members: [primary, ..._others],
+        diet: _diet,
+        liked: _liked,
+        disliked: _disliked,
+        allergens: _allergens,
+        includeSnacks: _includeSnacks,
+        dayRules: _rulesFor(_diet),
+        shopping: _shopping,
+      ),
+    );
+  }
+
+  /// Rules trimmed to what can matter on [diet] — "no meat on Tuesday" means
+  /// nothing to a vegetarian household — and to people still in it.
+  List<DayRule> _rulesFor(DietType diet) {
+    final ids = {
+      widget.initial?.primary.id ?? 'primary',
+      ..._others.map((m) => m.id),
+    };
+    return [
+      for (final r in _dayRules)
+        DayRule(
+          memberIds: r.memberIds.intersection(ids),
+          weekdays: r.weekdays,
+          groups: r.groups.where((g) => g.relevantTo(diet)).toSet(),
+          ingredients: r.ingredients,
+        ),
+    ].where((r) => !r.isEmpty).toList();
   }
 
   @override
@@ -137,6 +166,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _householdPage(),
       _dietPage(),
       _preferencesPage(),
+      _observancePage(),
+      _shoppingPage(),
     ];
 
     return Scaffold(
@@ -412,7 +443,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     '${_others[i].weightKg.round()} kg'),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: () => setState(() => _others.removeAt(i)),
+                  onPressed: () => setState(() {
+                    final gone = _others.removeAt(i).id;
+                    _dayRules = [
+                      for (final r in _dayRules)
+                        r.copyWith(memberIds: {...r.memberIds}..remove(gone)),
+                    ].where((r) => !r.isEmpty).toList();
+                  }),
                 ),
                 onTap: () => _editMember(i),
               ),
@@ -493,33 +530,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
 
   Widget _preferencesPage() {
-    // Offer the ingredients a household would actually have an opinion about.
-    final choosable = widget.ingredients.values
-        .where((i) => !i.pantryStaple && _diet.admits(i.diet))
-        .where((i) => const {
-              Aisle.vegetables,
-              Aisle.pulses,
-              Aisle.dairy,
-              Aisle.eggmeat,
-              Aisle.nuts,
-              Aisle.fruits,
-            }.contains(i.aisle))
-        .toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
+    final matches =
+        _avoidable().where((i) => matchesSearch(i, _prefQuery)).toList();
+    final groupMatches = AvoidGroup.values
+        .where((g) => g.relevantTo(_diet) && _groupFoods(g).isNotEmpty)
+        .where((g) => g.matchesSearch(_prefQuery))
+        .toList();
+    final marked = [
+      if (_liked.isNotEmpty)
+        '${_liked.length} favourite${_liked.length == 1 ? '' : 's'}',
+      if (_disliked.isNotEmpty) '${_disliked.length} avoided',
+      if (_allergens.isNotEmpty)
+        '${_allergens.length} allerg${_allergens.length == 1 ? 'y' : 'ies'}',
+    ];
 
     return _scroll(
       title: 'Anything you avoid?',
       subtitle: 'Tap once to mark a favourite, twice to avoid it, three times '
           'to clear. Long-press to mark a true allergy, which is excluded '
-          'absolutely.',
+          'absolutely. A group, like Dairy, marks every food in it at once.',
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final ing in choosable) _prefChip(ing),
-          ],
+        FoodSearchField(
+          hint: 'Search foods or groups — e.g. dairy, spinach, chicken',
+          onChanged: (q) => setState(() => _prefQuery = q),
         ),
+        const SizedBox(height: 12),
+        if (matches.isEmpty && groupMatches.isEmpty)
+          NoSearchMatches(_prefQuery)
+        else ...[
+          if (groupMatches.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [for (final g in groupMatches) _prefGroupChip(g)],
+            ),
+            if (matches.isNotEmpty) const Divider(height: 24),
+          ],
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [for (final ing in matches) _prefChip(ing)],
+          ),
+        ],
+        if (marked.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Marked so far: ${marked.join(', ')}.',
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
         const SizedBox(height: 20),
         if (_allergens.isNotEmpty)
           Card(
@@ -542,6 +604,198 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
       ],
+    );
+  }
+
+  List<({String id, String name})> get _people => [
+        (id: widget.initial?.primary.id ?? 'primary', name: 'You'),
+        for (final m in _others) (id: m.id, name: m.name),
+      ];
+
+  Widget _observancePage() {
+    final scheme = Theme.of(context).colorScheme;
+    final names = {for (final p in _people) p.id: p.name};
+    return _scroll(
+      title: 'Any days you avoid certain foods?',
+      subtitle: 'Many families give up meat on a Tuesday, or onion and garlic '
+          'on a fast day. Tell us which days, and those days\' meals leave '
+          'the food out. Meals are cooked once for everyone, so the whole '
+          'table follows the day.',
+      children: [
+        for (var i = 0; i < _dayRules.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Card(
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: scheme.tertiaryContainer,
+                  child: Icon(
+                    Icons.event_repeat,
+                    color: scheme.onTertiaryContainer,
+                  ),
+                ),
+                title: Text(describeDays(_dayRules[i].weekdays)),
+                subtitle: Text(
+                  '${describeAvoided(_dayRules[i], widget.ingredients, _diet)}\n'
+                  'For ${_dayRules[i].memberIds.map((id) => names[id] ?? 'someone').join(', ')}',
+                ),
+                isThreeLine: true,
+                trailing: IconButton(
+                  tooltip: 'Remove',
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => setState(() => _dayRules.removeAt(i)),
+                ),
+                onTap: () => _editRule(i),
+              ),
+            ),
+          ),
+        OutlinedButton.icon(
+          onPressed: () => _editRule(null),
+          icon: const Icon(Icons.add),
+          label: const Text('Add a day'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(48),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          _dayRules.isEmpty
+              ? 'Nothing like this in your home? Just continue.'
+              : 'These are kept every week, with no exceptions — unlike foods '
+                  'you simply prefer to avoid.',
+          style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _editRule(int? i) async {
+    final result = await showModalBottomSheet<DayRule>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _DayRuleSheet(
+        people: _people,
+        diet: _diet,
+        ingredients: _avoidable(),
+        allFoods: widget.ingredients.values
+            .where((i) => _diet.admits(i.diet))
+            .toList(),
+        existing: i == null ? null : _dayRules[i],
+      ),
+    );
+    if (result == null) return;
+    setState(() {
+      if (i == null) {
+        _dayRules.add(result);
+      } else {
+        _dayRules[i] = result;
+      }
+    });
+  }
+
+  Widget _shoppingPage() => _scroll(
+        title: 'How often do you shop for fresh food?',
+        subtitle: 'Greens, paneer and curd only keep a few days. We plan each '
+            'day\'s meals around what will still be fresh, and split the '
+            'shopping list into your shopping days so nothing goes off in '
+            'the fridge.',
+        children: [
+          for (final r in ShoppingRhythm.values)
+            _choiceTile<ShoppingRhythm>(
+              value: r,
+              group: _shopping,
+              title: r.label,
+              subtitle: r.description,
+              onTap: () => setState(() => _shopping = r),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            'Milk is assumed to come fresh every day, as it does in most '
+            'Indian homes.',
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+
+  /// Ingredients a household would actually have an opinion about.
+  List<Ingredient> _avoidable() => widget.ingredients.values
+      .where((i) => !i.pantryStaple && _diet.admits(i.diet))
+      .where(
+        (i) => const {
+          Aisle.vegetables,
+          Aisle.pulses,
+          Aisle.dairy,
+          Aisle.eggmeat,
+          Aisle.nuts,
+          Aisle.fruits,
+        }.contains(i.aisle),
+      )
+      .toList()
+    ..sort((a, b) => a.name.compareTo(b.name));
+
+  /// Every food a group covers that this household could be served —
+  /// staples like atta included, which have no chip of their own.
+  Set<String> _groupFoods(AvoidGroup g) => {
+        for (final i in widget.ingredients.values)
+          if (_diet.admits(i.diet) && g.covers(i)) i.id,
+      };
+
+  /// A group marks all its foods at once: tap to avoid them all (or clear
+  /// them), long-press for an allergy to all of them.
+  Widget _prefGroupChip(AvoidGroup g) {
+    final scheme = Theme.of(context).colorScheme;
+    final ids = _groupFoods(g);
+    final allergic = _allergens.containsAll(ids);
+    final avoided = !allergic && _disliked.union(_allergens).containsAll(ids);
+
+    final bg = allergic
+        ? scheme.errorContainer
+        : (avoided ? scheme.surfaceContainerHighest : null);
+    final fg = allergic
+        ? scheme.onErrorContainer
+        : (avoided ? scheme.onSurfaceVariant : null);
+
+    return Tooltip(
+      message: g.description,
+      child: GestureDetector(
+        onLongPress: () => setState(() {
+          if (allergic) {
+            _allergens.removeAll(ids);
+          } else {
+            _liked.removeAll(ids);
+            _disliked.removeAll(ids);
+            _allergens.addAll(ids);
+          }
+        }),
+        child: FilterChip(
+          selected: avoided || allergic,
+          showCheckmark: false,
+          avatar: Icon(
+            allergic
+                ? Icons.block
+                : (avoided
+                    ? Icons.thumb_down_alt_outlined
+                    : Icons.category_outlined),
+            size: 16,
+            color: fg,
+          ),
+          backgroundColor: bg,
+          selectedColor: bg,
+          label: Text(g.label, style: fg == null ? null : TextStyle(color: fg)),
+          onSelected: (_) => setState(() {
+            if (allergic) return; // cleared only by long-press
+            if (avoided) {
+              _disliked.removeAll(ids);
+            } else {
+              _liked.removeAll(ids);
+              _disliked.addAll(ids.difference(_allergens));
+            }
+          }),
+        ),
+      ),
     );
   }
 
@@ -755,6 +1009,266 @@ class _MemberSheetState extends State<_MemberSheet> {
               );
             },
             child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom sheet for adding or editing a weekly observance.
+class _DayRuleSheet extends StatefulWidget {
+  const _DayRuleSheet({
+    required this.people,
+    required this.diet,
+    required this.ingredients,
+    required this.allFoods,
+    this.existing,
+  });
+
+  final List<({String id, String name})> people;
+  final DietType diet;
+
+  /// Foods offered one by one.
+  final List<Ingredient> ingredients;
+
+  /// Everything the household might eat, which is what a group covers —
+  /// staples like atta included.
+  final List<Ingredient> allFoods;
+  final DayRule? existing;
+
+  @override
+  State<_DayRuleSheet> createState() => _DayRuleSheetState();
+}
+
+class _DayRuleSheetState extends State<_DayRuleSheet> {
+  late Set<String> _members;
+  late Set<int> _days;
+  late Set<AvoidGroup> _groups;
+  late Set<String> _foods;
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    _members = {...?e?.memberIds};
+    if (_members.isEmpty && widget.people.length == 1) {
+      _members.add(widget.people.single.id);
+    }
+    _days = {...?e?.weekdays};
+    _groups = {...?e?.groups};
+    _foods = {...?e?.ingredients};
+  }
+
+  String _nameOf(String id) =>
+      widget.allFoods.where((i) => i.id == id).firstOrNull?.name ?? id;
+
+  /// A group, ticked or not. One already covered by a wider group ticked
+  /// alongside it — Chicken once All non-veg is on — shows as ticked and
+  /// locked.
+  Widget _groupTile(AvoidGroup g) {
+    final implied = g.isImpliedBy(_groups, widget.allFoods);
+    return CheckboxListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      value: implied || _groups.contains(g),
+      onChanged: implied
+          ? null
+          : (v) => setState(() {
+                if (v == true) {
+                  _groups.add(g);
+                  // Drop what the new group now covers: narrower groups, and
+                  // foods picked one by one.
+                  _groups.removeWhere(
+                      (o) => o.isImpliedBy({..._groups}..remove(o), widget.allFoods));
+                  _foods.removeWhere((id) => widget.allFoods
+                      .any((i) => i.id == id && g.covers(i)));
+                } else {
+                  _groups.remove(g);
+                }
+              }),
+      title: Text(g.label, style: const TextStyle(fontSize: 15)),
+      subtitle: Text(g.description),
+      controlAffinity: ListTileControlAffinity.leading,
+    );
+  }
+
+  DayRule get _rule => DayRule(
+        memberIds: _members,
+        weekdays: _days,
+        groups: _groups,
+        ingredients: _foods,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final groups = AvoidGroup.values
+        .where((g) => g.relevantTo(widget.diet))
+        .where((g) => widget.allFoods.any(g.covers))
+        .toList();
+
+    Widget label(String t) => Padding(
+          padding: const EdgeInsets.only(top: 18, bottom: 8),
+          child: Text(
+            t,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
+        );
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      maxChildSize: 0.95,
+      // Save stays pinned below the list, however long the food list gets.
+      builder: (context, controller) => Column(
+        children: [
+          Expanded(
+            child: ListView(
+              controller: controller,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              children: [
+                Text(
+                  widget.existing == null ? 'Add a day' : 'Edit day',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (widget.people.length > 1) ...[
+                  label('Who keeps it?'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final p in widget.people)
+                        FilterChip(
+                          label: Text(p.name),
+                          selected: _members.contains(p.id),
+                          onSelected: (v) => setState(
+                            () =>
+                                v ? _members.add(p.id) : _members.remove(p.id),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+                label('Which days?'),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (var d = 0; d < 7; d++)
+                      FilterChip(
+                        label: Text(weekdayNames[d].substring(0, 3)),
+                        selected: _days.contains(d),
+                        onSelected: (v) =>
+                            setState(() => v ? _days.add(d) : _days.remove(d)),
+                      ),
+                  ],
+                ),
+                label('What is left out?'),
+                if (_foods.isNotEmpty) ...[
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final id in _foods)
+                        InputChip(
+                          label: Text(
+                            _nameOf(id),
+                            style: const TextStyle(fontSize: 12.5),
+                          ),
+                          selected: true,
+                          showCheckmark: false,
+                          onDeleted: () => setState(() => _foods.remove(id)),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                FoodSearchField(
+                  hint: 'Search foods or groups — e.g. dairy, meat, paneer',
+                  onChanged: (q) => setState(() => _query = q),
+                ),
+                const SizedBox(height: 4),
+                () {
+                  // Ticked groups stay on screen whatever the search, so they
+                  // can always be unticked.
+                  final shownGroups = groups
+                      .where((g) =>
+                          _groups.contains(g) || g.matchesSearch(_query))
+                      .toList();
+                  final matches = widget.ingredients
+                      .where((i) => !_foods.contains(i.id))
+                      .where((i) => !_groups.any((g) => g.covers(i)))
+                      .where((i) => matchesSearch(i, _query))
+                      .toList();
+                  if (shownGroups.isEmpty && matches.isEmpty) {
+                    return NoSearchMatches(_query);
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final g in shownGroups) _groupTile(g),
+                      if (matches.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            for (final ing in matches)
+                              FilterChip(
+                                label: Text(
+                                  ing.name,
+                                  style: const TextStyle(fontSize: 12.5),
+                                ),
+                                selected: false,
+                                onSelected: (_) =>
+                                    setState(() => _foods.add(ing.id)),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  );
+                }(),
+              ],
+            ),
+          ),
+          SafeArea(
+            top: false,
+            minimum: EdgeInsets.fromLTRB(
+              20,
+              8,
+              20,
+              16 + MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_rule.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      'Pick ${_members.isEmpty ? 'who, ' : ''}'
+                      '${_days.isEmpty ? 'at least one day, ' : ''}'
+                      'and what is left out.',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                FilledButton(
+                  onPressed: _rule.isEmpty
+                      ? null
+                      : () => Navigator.of(context).pop(_rule),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
           ),
         ],
       ),

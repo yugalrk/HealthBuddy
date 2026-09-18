@@ -23,36 +23,75 @@ abstract class ProfileRepository {
   Future<void> clear();
 }
 
-/// The saved week: the seed it was generated from plus the ticked shopping
-/// items. The plan itself is regenerated from the seed, which keeps storage
-/// tiny and guarantees plan and profile never drift apart.
+/// The saved week.
+///
+/// Once a week is under way it is adjusted to what the household actually
+/// ate, so the plan is stored as it stands rather than regenerated from its
+/// seed. [plan] holds that, alongside the end-of-day feedback, the shops
+/// already made, and the ticked shopping items. A week saved before plans
+/// were stored has no [plan], and is regenerated from [seed].
 class SavedWeek {
   const SavedWeek({
     required this.seed,
     required this.generatedAt,
     this.checkedItems = const {},
+    this.plan,
+    this.feedback = const [],
+    this.bought = const [],
+    this.frozenThrough = -1,
   });
 
   final int seed;
+
+  /// When the week was planned. Its date is day 0 of the week.
   final DateTime generatedAt;
   final Set<String> checkedItems;
+  final Map<String, dynamic>? plan;
+  final List<Map<String, dynamic>> feedback;
+  final List<Map<String, dynamic>> bought;
+  final int frozenThrough;
 
-  SavedWeek copyWith({Set<String>? checkedItems}) => SavedWeek(
+  SavedWeek copyWith({
+    Set<String>? checkedItems,
+    Map<String, dynamic>? plan,
+    List<Map<String, dynamic>>? feedback,
+    List<Map<String, dynamic>>? bought,
+    int? frozenThrough,
+  }) =>
+      SavedWeek(
         seed: seed,
         generatedAt: generatedAt,
         checkedItems: checkedItems ?? this.checkedItems,
+        plan: plan ?? this.plan,
+        feedback: feedback ?? this.feedback,
+        bought: bought ?? this.bought,
+        frozenThrough: frozenThrough ?? this.frozenThrough,
       );
 
   Map<String, dynamic> toJson() => {
         'seed': seed,
         'generatedAt': generatedAt.toIso8601String(),
         'checkedItems': checkedItems.toList(),
+        if (plan != null) 'plan': plan,
+        'feedback': feedback,
+        'bought': bought,
+        'frozenThrough': frozenThrough,
       };
 
   static SavedWeek fromJson(Map<String, dynamic> j) => SavedWeek(
         seed: j['seed'] as int,
         generatedAt: DateTime.parse(j['generatedAt'] as String),
         checkedItems: {...(j['checkedItems'] as List? ?? []).cast<String>()},
+        plan: j['plan'] as Map<String, dynamic>?,
+        feedback: [
+          for (final f in (j['feedback'] as List? ?? []))
+            f as Map<String, dynamic>
+        ],
+        bought: [
+          for (final b in (j['bought'] as List? ?? []))
+            b as Map<String, dynamic>
+        ],
+        frozenThrough: j['frozenThrough'] as int? ?? -1,
       );
 }
 

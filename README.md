@@ -27,18 +27,34 @@ near-zero-protein gourd dish becoming the centre of a meal.
 **Iron and calcium are planned for**, not left to chance — they are the two
 nutrients Indian diets most often fall short on.
 
+**It keeps the household's days.** No meat on Tuesdays, no onion and garlic on
+a fast day, no rice on a particular day: tell it once and those days' meals
+leave the food out, for the whole table, every week.
+
+**It plans around shelf life.** It knows paneer keeps three days and palak two,
+and how often you shop. Perishables are cooked while they are good, opened
+packs are used up before new ones are started, and the shopping list is split
+into your shopping days. Anything a whole pack still leaves over is shown, not
+hidden.
+
+**It adjusts to what actually happened.** Each evening it asks how the day
+went. If a meal was skipped, halved or eaten out, the rest of the week is
+planned again: part of the shortfall is made up (at most 20% a day), and the
+food bought for the missed meal is cooked before it goes off.
+
 ## Layout
 
 ```
 lib/
   models/     profile, food (ingredient/recipe/nutrients), plan
-  engine/     targets, planner, shopping_list      <- pure Dart, no Flutter
+  engine/     targets, planner, stock, adapt,
+              shopping_list                        <- pure Dart, no Flutter
   data/       food_data.dart, repositories/
   state/      app_state.dart
   ui/         onboarding, plan, shopping, nutrition, profile
 assets/seed/  ingredients.json, recipes.json
-test/         37 tests
-tool/         demo_plan, diagnose, bench, make_icons
+test/         85 tests
+tool/         demo_plan, spoilage_report, diagnose, bench, make_icons
 docs/         NUTRITION_SOURCES.md, RELEASE.md
 store/        listing copy, privacy policy, graphics
 ```

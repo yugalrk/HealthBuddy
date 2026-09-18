@@ -48,7 +48,8 @@ class NutritionScreen extends StatelessWidget {
                       Text(
                         'Individual days vary on purpose — a lighter lunch is '
                         'made up at dinner, and a short day is made up the '
-                        'next. What matters is the weekly total.',
+                        'next. What matters is the weekly total.'
+                        '${app.progress?.feedback.isNotEmpty ?? false ? ' Days you have told us about count what was actually eaten.' : ''}',
                         style: TextStyle(
                             fontSize: 12.5,
                             height: 1.35,

@@ -10,7 +10,9 @@
       "fibre": "g (total dietary fibre)",
       "iron": "mg",
       "calcium": "mg",
-      "src": "ifct2017 = Indian Food Composition Tables 2017 (ICMR-NIN); usda = USDA FoodData Central; est = reasoned estimate pending verification"
+      "src": "ifct2017 = Indian Food Composition Tables 2017 (ICMR-NIN); usda = USDA FoodData Central; est = reasoned estimate pending verification",
+      "shelfLifeDays": "days the item stays good after purchase, stored the usual way (fridge for dairy, meat and leafy greens). Guidance-grade estimates; see docs/NUTRITION_SOURCES.md",
+      "dailyFresh": "bought fresh every day (milk from the doodhwala), so never stocked for the week"
     },
     "reviewNote": "Every row marked src=est MUST be verified against IFCT 2017 before production release. See docs/NUTRITION_SOURCES.md."
   },
@@ -32,7 +34,8 @@
         "iron": 2.8,
         "calcium": 73
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "moong_dal",
@@ -51,7 +54,8 @@
         "iron": 3.9,
         "calcium": 75
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "chana_dal",
@@ -70,7 +74,8 @@
         "iron": 5.3,
         "calcium": 56
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "masoor_dal",
@@ -89,7 +94,8 @@
         "iron": 7.0,
         "calcium": 69
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "urad_dal",
@@ -108,7 +114,8 @@
         "iron": 3.8,
         "calcium": 158
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "rajma",
@@ -127,7 +134,8 @@
         "iron": 5.1,
         "calcium": 143
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "kabuli_chana",
@@ -146,7 +154,8 @@
         "iron": 4.6,
         "calcium": 57
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "kala_chana",
@@ -165,7 +174,8 @@
         "iron": 5.8,
         "calcium": 202
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "lobia",
@@ -184,7 +194,8 @@
         "iron": 4.5,
         "calcium": 80
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "soya_chunks",
@@ -203,7 +214,8 @@
         "iron": 20.0,
         "calcium": 350
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 180
     },
     {
       "id": "atta",
@@ -222,7 +234,8 @@
         "iron": 4.0,
         "calcium": 39
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "rice_raw",
@@ -241,7 +254,8 @@
         "iron": 0.6,
         "calcium": 8
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "brown_rice",
@@ -260,7 +274,8 @@
         "iron": 1.5,
         "calcium": 23
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 180
     },
     {
       "id": "poha",
@@ -279,7 +294,8 @@
         "iron": 2.8,
         "calcium": 20
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "rava",
@@ -298,7 +314,8 @@
         "iron": 2.6,
         "calcium": 16
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "oats",
@@ -317,7 +334,8 @@
         "iron": 4.7,
         "calcium": 54
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "besan",
@@ -336,7 +354,8 @@
         "iron": 4.9,
         "calcium": 56
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "bajra",
@@ -355,7 +374,8 @@
         "iron": 8.0,
         "calcium": 42
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "jowar",
@@ -374,7 +394,8 @@
         "iron": 3.9,
         "calcium": 25
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "ragi",
@@ -393,7 +414,8 @@
         "iron": 4.6,
         "calcium": 364
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "idli_rava",
@@ -412,7 +434,8 @@
         "iron": 1.0,
         "calcium": 12
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 180
     },
     {
       "id": "bread_brown",
@@ -431,7 +454,8 @@
         "iron": 2.5,
         "calcium": 90
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 4
     },
     {
       "id": "paneer",
@@ -450,7 +474,8 @@
         "iron": 0.2,
         "calcium": 420
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 3
     },
     {
       "id": "milk",
@@ -469,7 +494,9 @@
         "iron": 0.1,
         "calcium": 120
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 2,
+      "dailyFresh": true
     },
     {
       "id": "curd",
@@ -488,7 +515,8 @@
         "iron": 0.1,
         "calcium": 149
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 3
     },
     {
       "id": "ghee",
@@ -507,7 +535,8 @@
         "iron": 0.0,
         "calcium": 0
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "butter",
@@ -526,7 +555,8 @@
         "iron": 0.0,
         "calcium": 24
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 30
     },
     {
       "id": "egg",
@@ -546,7 +576,8 @@
         "calcium": 56
       },
       "src": "usda",
-      "pieceGrams": 50
+      "pieceGrams": 50,
+      "shelfLifeDays": 10
     },
     {
       "id": "chicken_breast",
@@ -565,7 +596,8 @@
         "iron": 1.0,
         "calcium": 15
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 2
     },
     {
       "id": "chicken_curry_cut",
@@ -584,7 +616,8 @@
         "iron": 1.3,
         "calcium": 14
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 2
     },
     {
       "id": "fish_rohu",
@@ -603,7 +636,8 @@
         "iron": 1.0,
         "calcium": 650
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 1
     },
     {
       "id": "potato",
@@ -622,7 +656,8 @@
         "iron": 0.5,
         "calcium": 10
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 30
     },
     {
       "id": "onion",
@@ -641,14 +676,15 @@
         "iron": 0.6,
         "calcium": 47
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 30
     },
     {
       "id": "tomato",
       "name": "Tomato",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -660,7 +696,8 @@
         "iron": 0.6,
         "calcium": 12
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 7
     },
     {
       "id": "palak",
@@ -680,7 +717,8 @@
         "calcium": 73
       },
       "src": "ifct2017",
-      "note": "IFCT 2017 corrected spinach iron sharply downward from older tables. 1.14 mg is the modern value; do not use legacy ~17 mg figures."
+      "note": "IFCT 2017 corrected spinach iron sharply downward from older tables. 1.14 mg is the modern value; do not use legacy ~17 mg figures.",
+      "shelfLifeDays": 2
     },
     {
       "id": "methi",
@@ -699,14 +737,15 @@
         "iron": 1.9,
         "calcium": 395
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 2
     },
     {
       "id": "bhindi",
       "name": "Bhindi (okra)",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -718,14 +757,15 @@
         "iron": 0.8,
         "calcium": 82
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 3
     },
     {
       "id": "baingan",
       "name": "Baingan (brinjal)",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -737,7 +777,8 @@
         "iron": 0.4,
         "calcium": 18
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 4
     },
     {
       "id": "gobi",
@@ -756,7 +797,8 @@
         "iron": 0.5,
         "calcium": 22
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 5
     },
     {
       "id": "patta_gobi",
@@ -775,7 +817,8 @@
         "iron": 0.4,
         "calcium": 40
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 10
     },
     {
       "id": "lauki",
@@ -794,14 +837,15 @@
         "iron": 0.3,
         "calcium": 20
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 5
     },
     {
       "id": "carrot",
       "name": "Carrot",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -813,7 +857,8 @@
         "iron": 0.4,
         "calcium": 33
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 14
     },
     {
       "id": "capsicum",
@@ -832,14 +877,15 @@
         "iron": 0.7,
         "calcium": 10
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 5
     },
     {
       "id": "beans_french",
       "name": "French Beans",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -851,14 +897,15 @@
         "iron": 1.0,
         "calcium": 37
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 4
     },
     {
       "id": "matar",
       "name": "Green Peas (matar)",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -870,14 +917,15 @@
         "iron": 1.5,
         "calcium": 25
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 4
     },
     {
       "id": "cucumber",
       "name": "Cucumber",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -889,14 +937,15 @@
         "iron": 0.3,
         "calcium": 16
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 5
     },
     {
       "id": "banana",
       "name": "Banana",
       "aisle": "fruits",
       "unit": "g",
-      "packSize": 1000,
+      "packSize": 500,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -909,7 +958,8 @@
         "calcium": 5
       },
       "src": "ifct2017",
-      "pieceGrams": 120
+      "pieceGrams": 120,
+      "shelfLifeDays": 4
     },
     {
       "id": "apple",
@@ -929,14 +979,15 @@
         "calcium": 6
       },
       "src": "usda",
-      "pieceGrams": 150
+      "pieceGrams": 150,
+      "shelfLifeDays": 21
     },
     {
       "id": "papaya",
       "name": "Papaya",
       "aisle": "fruits",
       "unit": "g",
-      "packSize": 1000,
+      "packSize": 500,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -948,7 +999,8 @@
         "iron": 0.3,
         "calcium": 20
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 3
     },
     {
       "id": "peanuts",
@@ -967,7 +1019,8 @@
         "iron": 3.0,
         "calcium": 90
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "almonds",
@@ -986,7 +1039,8 @@
         "iron": 3.7,
         "calcium": 269
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "til",
@@ -1005,7 +1059,8 @@
         "iron": 14.6,
         "calcium": 975
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "oil",
@@ -1024,7 +1079,8 @@
         "iron": 0.0,
         "calcium": 0
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "salt",
@@ -1043,7 +1099,8 @@
         "iron": 0,
         "calcium": 0
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "haldi",
@@ -1062,7 +1119,8 @@
         "iron": 41.0,
         "calcium": 183
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "mirch",
@@ -1081,7 +1139,8 @@
         "iron": 9.0,
         "calcium": 148
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 180
     },
     {
       "id": "dhania_powder",
@@ -1100,7 +1159,8 @@
         "iron": 16.3,
         "calcium": 709
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "jeera",
@@ -1119,7 +1179,8 @@
         "iron": 66.4,
         "calcium": 931
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "garam_masala",
@@ -1138,7 +1199,8 @@
         "iron": 20.0,
         "calcium": 500
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 180
     },
     {
       "id": "rai",
@@ -1157,7 +1219,8 @@
         "iron": 9.2,
         "calcium": 266
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "hing",
@@ -1176,7 +1239,8 @@
         "iron": 39.4,
         "calcium": 690
       },
-      "src": "est"
+      "src": "est",
+      "shelfLifeDays": 180
     },
     {
       "id": "ginger",
@@ -1195,7 +1259,8 @@
         "iron": 0.6,
         "calcium": 16
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 21
     },
     {
       "id": "garlic",
@@ -1214,7 +1279,8 @@
         "iron": 1.7,
         "calcium": 181
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 30
     },
     {
       "id": "hari_mirch",
@@ -1233,14 +1299,15 @@
         "iron": 1.2,
         "calcium": 18
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 7
     },
     {
       "id": "dhania_patta",
       "name": "Coriander Leaves",
       "aisle": "vegetables",
       "unit": "g",
-      "packSize": 100,
+      "packSize": 50,
       "pantryStaple": false,
       "diet": "veg",
       "per100": {
@@ -1252,7 +1319,8 @@
         "iron": 1.8,
         "calcium": 67
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 5
     },
     {
       "id": "nimbu",
@@ -1271,7 +1339,8 @@
         "iron": 0.6,
         "calcium": 26
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 14
     },
     {
       "id": "imli",
@@ -1290,7 +1359,8 @@
         "iron": 2.8,
         "calcium": 74
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 180
     },
     {
       "id": "curry_patta",
@@ -1309,7 +1379,8 @@
         "iron": 0.9,
         "calcium": 830
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 7
     },
     {
       "id": "sugar",
@@ -1328,7 +1399,8 @@
         "iron": 0.1,
         "calcium": 12
       },
-      "src": "ifct2017"
+      "src": "ifct2017",
+      "shelfLifeDays": 180
     },
     {
       "id": "tofu",
@@ -1348,7 +1420,8 @@
         "calcium": 350
       },
       "src": "usda",
-      "note": "Calcium figure assumes calcium-set tofu, which is the common commercial form."
+      "note": "Calcium figure assumes calcium-set tofu, which is the common commercial form.",
+      "shelfLifeDays": 4
     },
     {
       "id": "hung_curd",
@@ -1367,7 +1440,8 @@
         "iron": 0.1,
         "calcium": 100
       },
-      "src": "usda"
+      "src": "usda",
+      "shelfLifeDays": 4
     }
   ]
 }

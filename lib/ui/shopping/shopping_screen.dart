@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import '../../engine/shopping_list.dart';
 import '../../models/food.dart';
 import '../../state/app_state.dart';
+import '../plan/plan_screen.dart' show formatCookQty;
 import '../theme.dart';
 import '../widgets.dart';
 
@@ -28,6 +29,19 @@ class ShoppingScreen extends StatefulWidget {
 class _ShoppingScreenState extends State<ShoppingScreen> {
   _GroupMode _mode = _GroupMode.aisle;
 
+  /// Day of the trip being shown; null follows the next one due.
+  int? _tripDay;
+
+  String _tripLabel(ShoppingTrip t) {
+    final app = widget.app;
+    final date = formatShortDate(app.dateOf(t.day));
+    final today = app.todayIndex;
+    final name = t.day == today
+        ? 'Today'
+        : (t.day == today + 1 ? 'Tomorrow' : app.plan!.days[t.day].dayName);
+    return '$name · $date';
+  }
+
   @override
   Widget build(BuildContext context) {
     final app = widget.app;
@@ -38,11 +52,15 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     }
 
     final checked = app.checkedItems;
-    final total = list.itemCount;
-    final done = list.toBuy.values
-        .expand((e) => e)
-        .where((i) => checked.contains(i.ingredient.id))
-        .length;
+    final trips = list.trips;
+    final today = app.todayIndex;
+    final trip = trips.isEmpty
+        ? null
+        : trips.firstWhere((t) => t.day == _tripDay,
+            orElse: () => trips.firstWhere((t) => t.day >= today,
+                orElse: () => trips.last));
+    final total = trip?.items.length ?? 0;
+    final done = trip?.items.where((i) => checked.contains(trip.keyFor(i))).length ?? 0;
 
     return CustomScrollView(
       slivers: [
@@ -53,8 +71,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               tooltip: 'Copy list',
               icon: const Icon(Icons.copy_all_outlined),
               onPressed: () async {
-                await Clipboard.setData(
-                    ClipboardData(text: list.toShareText()));
+                await Clipboard.setData(ClipboardData(
+                    text: list.toShareText(
+                        dayLabel: (d) => _tripLabel(
+                            trips.firstWhere((t) => t.day == d)))));
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Shopping list copied')),
@@ -67,7 +87,56 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           sliver: SliverList.list(children: [
-            _ProgressCard(done: done, total: total, app: app),
+            if (trips.length > 1) ...[
+              Text(
+                'Your ${trips.length} shopping days this week. Fresh food is '
+                'bought close to when it is cooked, so as little as possible goes off.',
+                style: TextStyle(
+                    fontSize: 12.5, height: 1.35, color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final t in trips)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          avatar: t.day < today
+                              ? const Icon(Icons.check, size: 16)
+                              : (t.topUp
+                                  ? const Icon(Icons.add_shopping_cart, size: 16)
+                                  : null),
+                          label: Text(_tripLabel(t)),
+                          selected: t.day == trip!.day,
+                          onSelected: (_) => setState(() => _tripDay = t.day),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (trip != null)
+              _ProgressCard(
+                done: done,
+                total: total,
+                app: app,
+                caption: trips.length == 1
+                    ? null
+                    : '${trip.topUp ? 'An extra shop, to keep the week fresh' : (trip.day == 0 ? 'Main shop: everything that keeps, and fresh food for the first days' : 'Fresh food for the days that follow')}'
+                        ' · ${app.profile.householdSize} '
+                        '${app.profile.householdSize == 1 ? 'person' : 'people'}',
+              ),
+            if (list.daily.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _DailyCard(items: list.daily),
+            ],
+            if (list.spoilage.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _SpoilageCard(list: list, app: app),
+            ],
             const SizedBox(height: 12),
             _CoverageCard(list: list, app: app),
             const SizedBox(height: 16),
@@ -93,7 +162,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList.list(
             children: _mode == _GroupMode.aisle
-                ? _aisleSections(list, checked, scheme)
+                ? _aisleSections(list, trip, checked, scheme)
                 : _nutritionSections(list, checked, scheme),
           ),
         ),
@@ -101,20 +170,30 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     );
   }
 
-  List<Widget> _aisleSections(
-      ShoppingList list, Set<String> checked, ColorScheme scheme) {
+  List<Widget> _aisleSections(ShoppingList list, ShoppingTrip? trip,
+      Set<String> checked, ColorScheme scheme) {
+    if (trip == null) return const [];
     return [
-      for (final aisle in list.orderedAisles) ...[
-        SectionHeader(aisle.label),
-        ...list.toBuy[aisle]!.map((item) => _ItemTile(
+      for (final e in trip.byAisle.entries) ...[
+        SectionHeader(e.key.label),
+        ...e.value.map((item) => _ItemTile(
               item: item,
-              checked: checked.contains(item.ingredient.id),
-              onToggle: () => widget.app.toggleChecked(item.ingredient.id),
+              checked: checked.contains(trip.keyFor(item)),
+              onToggle: () => widget.app.toggleChecked(trip.keyFor(item)),
             )),
       ],
-      if (list.pantryCheck.isNotEmpty) _pantryCard(list, scheme),
+      if (trip.day == list.trips.first.day && list.pantryCheck.isNotEmpty)
+        _pantryCard(list, scheme),
     ];
   }
+
+  /// Every trip's key for [ingredientId]: in the week-wide view an item is
+  /// ticked once it has been bought on every trip that lists it.
+  List<String> _keysFor(ShoppingList list, String ingredientId) => [
+        for (final t in list.trips)
+          for (final i in t.items)
+            if (i.ingredient.id == ingredientId) t.keyFor(i),
+      ];
 
   List<Widget> _nutritionSections(
       ShoppingList list, Set<String> checked, ColorScheme scheme) {
@@ -131,12 +210,18 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           ),
         ),
         _RoleTotals(items: grouped[role]!),
-        ...grouped[role]!.map((item) => _ItemTile(
-              item: item,
-              checked: checked.contains(item.ingredient.id),
-              onToggle: () => widget.app.toggleChecked(item.ingredient.id),
-              showProtein: role == NutrientRole.protein,
-            )),
+        ...grouped[role]!.map((item) {
+          final keys = _keysFor(list, item.ingredient.id);
+          final all = keys.isNotEmpty && keys.every(checked.contains);
+          return _ItemTile(
+            item: item,
+            checked: all,
+            onToggle: keys.isEmpty
+                ? () {}
+                : () => widget.app.setChecked(keys, !all),
+            showProtein: role == NutrientRole.protein,
+          );
+        }),
       ],
     ];
   }
@@ -181,11 +266,16 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 }
 
 class _ProgressCard extends StatelessWidget {
-  const _ProgressCard(
-      {required this.done, required this.total, required this.app});
+  const _ProgressCard({
+    required this.done,
+    required this.total,
+    required this.app,
+    this.caption,
+  });
   final int done;
   final int total;
   final AppState app;
+  final String? caption;
 
   @override
   Widget build(BuildContext context) {
@@ -204,8 +294,9 @@ class _ProgressCard extends StatelessWidget {
                           fontSize: 16, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
                   Text(
-                    'One week for ${app.profile.householdSize} '
-                    '${app.profile.householdSize == 1 ? 'person' : 'people'}',
+                    caption ??
+                        'One week for ${app.profile.householdSize} '
+                            '${app.profile.householdSize == 1 ? 'person' : 'people'}',
                     style:
                         TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
                   ),
@@ -226,6 +317,98 @@ class _ProgressCard extends StatelessWidget {
                   Text(
                       '${total == 0 ? 0 : (done / total * 100).round()}%',
                       style: const TextStyle(fontSize: 11)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Milk and anything else bought fresh each morning.
+class _DailyCard extends StatelessWidget {
+  const _DailyCard({required this.items});
+  final List<DailyItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.wb_sunny_outlined, color: scheme.primary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Every day',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  for (final i in items)
+                    Text(
+                      '${i.ingredient.name}: about '
+                      '${ShoppingItem(ingredient: i.ingredient, neededQty: i.typical, buyQty: (i.typical / 50).ceil() * 50.0, packs: 1).quantityLabel} '
+                      'a day',
+                      style: TextStyle(
+                          fontSize: 13, color: scheme.onSurfaceVariant),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Anything the plan still cannot use in time. Said plainly rather than
+/// hidden, so the household can decide what to do with it.
+class _SpoilageCard extends StatelessWidget {
+  const _SpoilageCard({required this.list, required this.app});
+  final ShoppingList list;
+  final AppState app;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final ings = app.food.ingredients;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.timer_outlined, color: scheme.tertiary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('May be left over',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Packs only come in fixed sizes, so a little of these '
+                    'is not used by the plan before it is past its best. '
+                    'Add it to any meal.',
+                    style: TextStyle(
+                        fontSize: 12.5,
+                        height: 1.35,
+                        color: scheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 6),
+                  for (final sp in list.spoilage)
+                    Text(
+                      '${formatCookQty(sp.qty, ings[sp.ingredientId]!.unit)} '
+                      '${ings[sp.ingredientId]!.name} — use by '
+                      '${app.plan!.days[sp.goodUntil.clamp(0, 6)].dayName}',
+                      style: const TextStyle(fontSize: 13),
+                    ),
                 ],
               ),
             ),

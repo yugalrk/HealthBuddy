@@ -169,6 +169,8 @@ class Ingredient {
     required this.source,
     this.pieceGrams,
     this.note,
+    this.shelfLifeDays = 180,
+    this.dailyFresh = false,
   });
 
   final String id;
@@ -194,6 +196,21 @@ class Ingredient {
   final double? pieceGrams;
 
   final String? note;
+
+  /// Days the item stays good after purchase, stored the usual way — in the
+  /// fridge for dairy, meat and greens. Bought on day 0 with a shelf life of 2,
+  /// it can be cooked on days 0 and 1.
+  final int shelfLifeDays;
+
+  /// Bought fresh every day (milk from the doodhwala) rather than stocked for
+  /// the week, so it is never at risk of spoiling in the fridge.
+  final bool dailyFresh;
+
+  /// Would go off within a week if bought on the weekly shop.
+  bool get perishable => !dailyFresh && shelfLifeDays < 7;
+
+  /// Last day offset on which a purchase made on [boughtDay] is still good.
+  int goodUntil(int boughtDay) => boughtDay + shelfLifeDays - 1;
 
   Nutrients nutrientsFor(double qty) => per100 * (qty / 100.0);
 
@@ -245,6 +262,8 @@ class Ingredient {
       source: NutritionSource.parse(j['src'] as String? ?? 'est'),
       pieceGrams: (j['pieceGrams'] as num?)?.toDouble(),
       note: j['note'] as String?,
+      shelfLifeDays: j['shelfLifeDays'] as int? ?? 180,
+      dailyFresh: j['dailyFresh'] as bool? ?? false,
     );
   }
 }
@@ -358,4 +377,70 @@ class Recipe {
             RecipeLine(l['id'] as String, (l['qty'] as num).toDouble())
         ],
       );
+}
+
+/// Which ingredients an [AvoidGroup] rules out.
+extension AvoidGroupMatch on AvoidGroup {
+  bool covers(Ingredient i) => switch (this) {
+        AvoidGroup.nonVeg => i.diet != DietType.veg,
+        AvoidGroup.meat => i.diet == DietType.nonveg && !_isSeafood(i),
+        AvoidGroup.chicken => i.id.startsWith('chicken'),
+        AvoidGroup.fish => i.diet == DietType.nonveg && _isSeafood(i),
+        AvoidGroup.egg => i.diet == DietType.egg,
+        AvoidGroup.dairy => const {
+            'milk',
+            'curd',
+            'paneer',
+            'butter',
+            'ghee',
+            'hung_curd',
+          }.contains(i.id),
+        AvoidGroup.pulses => i.aisle == Aisle.pulses || i.id == 'besan',
+        AvoidGroup.grains => i.aisle == Aisle.grains && i.id != 'besan',
+        AvoidGroup.riceWheat => const {
+            'atta',
+            'rice_raw',
+            'brown_rice',
+            'poha',
+            'rava',
+            'idli_rava',
+            'bread_brown',
+          }.contains(i.id),
+        AvoidGroup.onionGarlic => const {'onion', 'garlic'}.contains(i.id),
+        AvoidGroup.nuts => i.aisle == Aisle.nuts,
+      };
+
+  /// Whether the group matches what someone typed: by its name, what it
+  /// holds, or another word for it — so "dairy", "diary" and "doodh" all find
+  /// Dairy.
+  bool matchesSearch(String query) {
+    final q = _searchKey(query);
+    if (q.isEmpty) return true;
+    return [label, description, ...aliases].any((t) => _searchKey(t).contains(q));
+  }
+
+  /// Whether [selected] already rules out everything this group would, so
+  /// ticking it too would add nothing — "Chicken" once "All non-veg" is on.
+  bool isImpliedBy(Set<AvoidGroup> selected, Iterable<Ingredient> foods) {
+    if (selected.contains(this)) return false;
+    final mine = foods.where(covers).toList();
+    return mine.isNotEmpty &&
+        mine.every((i) => selected.any((g) => g.covers(i)));
+  }
+}
+
+/// Lower case with spaces and punctuation dropped, so "non-veg", "non veg"
+/// and "nonveg" compare equal.
+String _searchKey(String s) => s.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
+
+bool _isSeafood(Ingredient i) =>
+    const ['fish', 'prawn', 'shrimp', 'crab'].any(i.id.startsWith);
+
+/// Whether [i] matches what someone typed into a search box — by name,
+/// including the English or Hindi name in brackets, or by id.
+bool matchesSearch(Ingredient i, String query) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  return i.name.toLowerCase().contains(q) ||
+      i.id.replaceAll('_', ' ').contains(q);
 }

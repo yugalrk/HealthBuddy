@@ -64,17 +64,85 @@ class ProfileScreen extends StatelessWidget {
                                 color: scheme.primary,
                               ),
                               const SizedBox(width: 10),
-                              Expanded(child: Text(m.name)),
-                              Text(
-                                '${m.age}y · ${m.weightKg.round()}kg · '
-                                '${m.goal.label}',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: scheme.onSurfaceVariant),
+                              Expanded(
+                                child: Text(m.name,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                              Flexible(
+                                flex: 2,
+                                child: Text(
+                                  '${m.age}y · ${m.weightKg.round()}kg · '
+                                  '${m.goal.label}',
+                                  textAlign: TextAlign.right,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: scheme.onSurfaceVariant),
+                                ),
                               ),
                             ],
                           ),
                         ),
+                    ],
+                  ),
+                ),
+              ),
+              const SectionHeader('Days and shopping'),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final r in p.dayRules)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.event_repeat,
+                                  size: 18, color: scheme.tertiary),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '${describeDays(r.weekdays)}: '
+                                  '${describeAvoided(r, app.food.ingredients, p.diet).toLowerCase()}',
+                                  style: const TextStyle(fontSize: 13.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (p.dayRules.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text('No days when foods are given up.',
+                              style: TextStyle(
+                                  fontSize: 13.5,
+                                  color: scheme.onSurfaceVariant)),
+                        ),
+                      Row(
+                        children: [
+                          Icon(Icons.shopping_bag_outlined,
+                              size: 18, color: scheme.primary),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                                'Shopping for fresh food: '
+                                '${p.shopping.label.toLowerCase()}',
+                                style: const TextStyle(fontSize: 13.5)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => _edit(context),
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          label: const Text('Change'),
+                        ),
+                      ),
                     ],
                   ),
                 ),

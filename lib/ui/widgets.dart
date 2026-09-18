@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../models/food.dart';
+import '../models/profile.dart';
 import 'theme.dart';
 
 /// A labelled bar comparing a planned nutrient against its target.
@@ -140,3 +141,108 @@ class SectionHeader extends StatelessWidget {
     );
   }
 }
+
+/// "Tuesday", "Tuesday and Saturday", "Every day", "Weekdays".
+String describeDays(Set<int> days) {
+  final sorted = days.toList()..sort();
+  if (sorted.length == 7) return 'Every day';
+  if (sorted.length == 5 && sorted.last == 4) return 'Weekdays';
+  final names = [for (final d in sorted) weekdayNames[d]];
+  if (names.length == 1) return names.single;
+  return '${names.take(names.length - 1).join(', ')} and ${names.last}';
+}
+
+/// "No meat & fish, eggs or paneer".
+String describeAvoided(
+    DayRule r, Map<String, Ingredient> ingredients, DietType diet) {
+  final parts = [
+    for (final g in r.groups)
+      // "All non-veg" reads as "no non-veg".
+      if (g.relevantTo(diet)) g.label.toLowerCase().replaceFirst(RegExp('^all '), ''),
+    for (final id in r.ingredients) (ingredients[id]?.name ?? id).toLowerCase(),
+  ];
+  if (parts.isEmpty) return 'Nothing that affects your meals';
+  if (parts.length == 1) return 'No ${parts.single}';
+  return 'No ${parts.take(parts.length - 1).join(', ')} or ${parts.last}';
+}
+
+const _months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/// "22 Sep".
+String formatShortDate(DateTime d) => '${d.day} ${_months[d.month - 1]}';
+
+/// A search box for filtering a list of foods as the user types.
+class FoodSearchField extends StatefulWidget {
+  const FoodSearchField({
+    super.key,
+    required this.onChanged,
+    this.hint = 'Search foods — e.g. paneer, spinach, chicken',
+  });
+
+  final ValueChanged<String> onChanged;
+  final String hint;
+
+  @override
+  State<FoodSearchField> createState() => _FoodSearchFieldState();
+}
+
+class _FoodSearchFieldState extends State<FoodSearchField> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: widget.hint,
+        prefixIcon: const Icon(Icons.search),
+        suffixIcon: _controller.text.isEmpty
+            ? null
+            : IconButton(
+                tooltip: 'Clear',
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  _controller.clear();
+                  setState(() {});
+                  widget.onChanged('');
+                },
+              ),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        isDense: true,
+      ),
+      onChanged: (v) {
+        setState(() {});
+        widget.onChanged(v);
+      },
+    );
+  }
+}
+
+/// Shown in place of a list when a search matches nothing.
+class NoSearchMatches extends StatelessWidget {
+  const NoSearchMatches(this.query, {super.key});
+  final String query;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          'Nothing matches "${query.trim()}".',
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      );
+}
+

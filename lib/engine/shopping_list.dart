@@ -3,6 +3,11 @@
 /// Two things make this more than a sum: quantities are rounded up to real
 /// market pack sizes, and pantry staples the household already owns are split
 /// into a separate "check you have" group rather than padding the buy list.
+///
+/// The list is also split into shopping trips. Anything that keeps is bought
+/// on the first shop; perishables are bought on the shop just before they are
+/// cooked, in amounts that get used before they go off. Milk is listed as a
+/// daily amount, since it is bought fresh each morning.
 library;
 
 import 'dart:math' as math;
@@ -10,6 +15,7 @@ import 'dart:math' as math;
 import '../models/food.dart';
 import '../models/plan.dart';
 import '../models/profile.dart';
+import 'stock.dart';
 
 class ShoppingItem {
   const ShoppingItem({
@@ -65,12 +71,68 @@ class ShoppingItem {
   }
 }
 
+/// Everything to buy on one day.
+class ShoppingTrip {
+  const ShoppingTrip({required this.day, required this.items, this.topUp = false});
+
+  /// Day offset into the week.
+  final int day;
+  final List<ShoppingItem> items;
+
+  /// A shop the household would not usually make, needed to keep the plan
+  /// fresh.
+  final bool topUp;
+
+  Map<Aisle, List<ShoppingItem>> get byAisle {
+    final out = <Aisle, List<ShoppingItem>>{};
+    for (final i in items) {
+      (out[i.aisle] ??= []).add(i);
+    }
+    return {
+      for (final a in Aisle.values)
+        if (out[a] != null) a: out[a]!,
+    };
+  }
+
+  /// Key for remembering that an item on this trip has been bought.
+  String keyFor(ShoppingItem item) => '$day:${item.ingredient.id}';
+}
+
+/// An item bought fresh each day rather than stocked.
+class DailyItem {
+  const DailyItem(this.ingredient, this.perDay);
+  final Ingredient ingredient;
+
+  /// Quantity needed on each day of the week, in base units.
+  final List<double> perDay;
+
+  double get typical {
+    final used = perDay.where((q) => q > 0).toList();
+    if (used.isEmpty) return 0;
+    return used.reduce((a, b) => a + b) / used.length;
+  }
+}
+
 class ShoppingList {
   const ShoppingList({
     required this.toBuy,
     required this.pantryCheck,
     required this.excludedOwned,
+    this.trips = const [],
+    this.daily = const [],
+    this.spoilage = const [],
   });
+
+  /// The shops, in date order. Every item in [toBuy] except the daily ones is
+  /// bought on one of these.
+  final List<ShoppingTrip> trips;
+
+  /// Bought fresh each day.
+  final List<DailyItem> daily;
+
+  /// Food the plan still cannot use before it goes off. Usually empty or a
+  /// few grams; shown rather than hidden.
+  final List<Spoilage> spoilage;
 
   /// Items to buy, grouped by aisle. Aisle order follows [Aisle.values], which
   /// is roughly the order you walk a shop.
@@ -151,12 +213,26 @@ class ShoppingList {
       Aisle.values.where((a) => toBuy[a]?.isNotEmpty ?? false).toList();
 
   /// Plain-text rendering for the "share list" action.
-  String toShareText() {
+  ///
+  /// [dayLabel] names a day offset for the trip headings — the engine does
+  /// not know dates.
+  String toShareText({String Function(int day)? dayLabel}) {
+    final label = dayLabel ?? (d) => 'Day ${d + 1}';
     final b = StringBuffer('Shopping list\n');
-    for (final aisle in orderedAisles) {
-      b.writeln('\n${aisle.label}');
-      for (final it in toBuy[aisle]!) {
-        b.writeln('  - ${it.ingredient.name} — ${it.quantityLabel}');
+    for (final trip in trips) {
+      if (trips.length > 1) b.writeln('\n== ${label(trip.day)} ==');
+      trip.byAisle.forEach((aisle, items) {
+        b.writeln('\n${aisle.label}');
+        for (final it in items) {
+          b.writeln('  - ${it.ingredient.name} — ${it.quantityLabel}');
+        }
+      });
+    }
+    if (daily.isNotEmpty) {
+      b.writeln('\nEvery day');
+      for (final d in daily) {
+        b.writeln('  - ${d.ingredient.name} — about '
+            '${ShoppingItem._formatQty(d.typical.roundToDouble(), d.ingredient.unit)}');
       }
     }
     if (pantryCheck.isNotEmpty) {
@@ -175,12 +251,36 @@ class ShoppingList {
 /// `pantryStaple` are moved to [ShoppingList.pantryCheck] instead of the buy
 /// list, because a list that tells you to buy turmeric every week is a list
 /// people stop trusting.
+///
+/// [stock] is the week run through the kitchen; by default the plan is
+/// replayed from an empty one. Pass the ledger from a week in progress so
+/// shops already made are shown as they were.
 ShoppingList buildShoppingList({
   required WeekPlan plan,
   required Map<String, Ingredient> ingredients,
   required Profile profile,
+  StockLedger? stock,
 }) {
+  final ledger = stock ??
+      StockLedger.replay(plan: plan, ingredients: ingredients, profile: profile);
   final totals = plan.ingredientTotals();
+
+  // Purchases per trip, merged per ingredient.
+  final perTrip = <int, Map<String, ({int packs, double qty, double used, bool topUp})>>{};
+  final boughtTotal = <String, ({int packs, double qty})>{};
+  for (final p in ledger.purchases) {
+    final trip = perTrip[p.day] ??= {};
+    final prev = trip[p.ingredientId];
+    trip[p.ingredientId] = (
+      packs: (prev?.packs ?? 0) + p.packs,
+      qty: (prev?.qty ?? 0) + p.qty,
+      used: (prev?.used ?? 0) + p.used,
+      topUp: (prev?.topUp ?? false) || p.topUp,
+    );
+    final t = boughtTotal[p.ingredientId];
+    boughtTotal[p.ingredientId] =
+        (packs: (t?.packs ?? 0) + p.packs, qty: (t?.qty ?? 0) + p.qty);
+  }
 
   final toBuy = <Aisle, List<ShoppingItem>>{};
   final pantryCheck = <ShoppingItem>[];
@@ -198,11 +298,14 @@ ShoppingList buildShoppingList({
       continue;
     }
 
-    final packs = math.max(1, (qty / ing.packSize).ceil());
+    // Bought across the trips when the ledger follows it; otherwise (spices,
+    // oils, milk) the week's need rounded up to whole packs.
+    final bought = boughtTotal[id];
+    final packs = bought?.packs ?? math.max(1, (qty / ing.packSize).ceil());
     final item = ShoppingItem(
       ingredient: ing,
       neededQty: qty,
-      buyQty: packs * ing.packSize,
+      buyQty: math.max(bought?.qty ?? 0, packs * ing.packSize),
       packs: packs,
     );
 
@@ -218,9 +321,35 @@ ShoppingList buildShoppingList({
   }
   pantryCheck.sort((a, b) => a.ingredient.name.compareTo(b.ingredient.name));
 
+  final trips = <ShoppingTrip>[
+    for (final day in perTrip.keys.toList()..sort())
+      ShoppingTrip(
+        day: day,
+        topUp: perTrip[day]!.values.every((e) => e.topUp),
+        items: [
+          for (final e in perTrip[day]!.entries)
+            if (ingredients[e.key] != null)
+              ShoppingItem(
+                ingredient: ingredients[e.key]!,
+                neededQty: e.value.used,
+                buyQty: e.value.qty,
+                packs: e.value.packs,
+              ),
+        ]..sort((a, b) => a.ingredient.name.compareTo(b.ingredient.name)),
+      ),
+  ];
+
+  final daily = [
+    for (final e in ledger.dailyFresh.entries)
+      if (ingredients[e.key] != null) DailyItem(ingredients[e.key]!, e.value),
+  ];
+
   return ShoppingList(
     toBuy: toBuy,
     pantryCheck: pantryCheck,
     excludedOwned: excluded,
+    trips: trips,
+    daily: daily,
+    spoilage: ledger.spoiled,
   );
 }

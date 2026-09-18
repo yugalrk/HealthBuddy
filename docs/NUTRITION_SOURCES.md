@@ -50,6 +50,34 @@ Targets follow **ICMR-NIN 2020**:
   mass preservation matters. These come from sports-nutrition consensus, **not** from ICMR-NIN,
   and are labelled as such in the app.
 
+## Shelf life and buying sizes
+
+Each ingredient carries `shelfLifeDays`: how many days it stays good after purchase when stored
+the usual way in an Indian home — the fridge for dairy, meat, fish and leafy greens; a cool shelf
+for onions, potatoes and dry goods. Bought on day 0 with a shelf life of 2, an item can be cooked
+on days 0 and 1. The planner uses these to keep perishables inside their window and to split the
+shopping list into trips.
+
+These are **guidance-grade estimates**, not measured values. They follow the refrigerated storage
+times in the USDA FoodKeeper guidance, shortened where Indian conditions (heat, pouch milk, fresh
+paneer without preservatives) make the US figure optimistic. Anything of 30 days or more never
+limits a week and is set to 180. Items worth a second look before release:
+
+| Item | Days | Note |
+|---|---|---|
+| Fish (rohu) | 1 | Fresh, not frozen |
+| Milk, chicken | 2 | Milk is also marked `dailyFresh`: bought each morning, never stocked |
+| Paneer, curd, palak, methi, papaya | 3 | Fresh paneer; home-set or packaged curd |
+| Bhindi, tofu, hung curd, bread, beans, matar, banana | 4 | Tofu after opening |
+| Coriander, gobi, lauki, capsicum, cucumber | 5 | Coriander wrapped in paper |
+| Tomato, curry leaves, green chilli | 7 | Tomatoes in the fridge |
+| Egg, cabbage, carrot, lemon | 10–14 | |
+
+`packSize` is the smallest amount that can sensibly be bought. For loose vegetables that is a
+*paav* (250 g), because Indian markets sell by the paav and a 500 g minimum made single-person
+weeks waste most of every bag. Whole items that cannot be split keep a whole-item size: a
+cauliflower, a lauki, a small (500 g) papaya.
+
 ## Limitations to state in-app
 
 1. Values are for **raw / as-purchased** items. Cooking changes water content and some
