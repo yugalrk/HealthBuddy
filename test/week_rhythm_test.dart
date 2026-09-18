@@ -173,6 +173,44 @@ void main() {
       expect(NutrientRole.protein.whyFor(DietType.nonveg), contains('meat'));
     });
 
+    test('a non-veg household is served meat or fish, except on its no-meat day',
+        () {
+      for (final rules in [
+        <DayRule>[],
+        [
+          const DayRule(
+              memberIds: {'a'}, weekdays: {1}, groups: {AvoidGroup.nonVeg}),
+        ],
+      ]) {
+        final p = Profile(
+            members: _family, diet: DietType.nonveg, dayRules: rules);
+        for (var seed = 0; seed < 3; seed++) {
+          final days = plan(p, seed: seed).days;
+          bool meaty(DayPlan d) => d.meals
+              .expand((m) => m.components)
+              .any((c) => c.recipe.diet == DietType.nonveg);
+          expect(days.where(meaty).length, greaterThanOrEqualTo(2),
+              reason: 'seed $seed, ${rules.length} rules');
+          if (rules.isNotEmpty) {
+            expect(days.where((d) => d.weekday == 1).any(meaty), isFalse);
+          }
+        }
+      }
+    });
+
+    test('an eggetarian household has eggs most days', () {
+      final p = Profile(members: _family, diet: DietType.egg);
+      final days = plan(p).days.where((d) => d.meals
+          .expand((m) => m.components)
+          .any((c) => c.recipe.diet == DietType.egg));
+      expect(days.length, greaterThanOrEqualTo(4));
+    });
+
+    test('rebalancing keeps the diet-dish weight', () {
+      const w = ScoreWeights(dietDish: 1.0);
+      expect(w.copyWith(protein: 5).dietDish, 1.0);
+    });
+
     test('rules follow the weekday, whatever day the week starts on', () {
       final p = Profile(members: [_adult], diet: DietType.veg, dayRules: [
         const DayRule(

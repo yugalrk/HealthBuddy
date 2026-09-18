@@ -584,7 +584,7 @@
       "name": "Chicken Breast (boneless)",
       "aisle": "eggmeat",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "nonveg",
       "per100": {
@@ -604,7 +604,7 @@
       "name": "Chicken (curry cut, with bone)",
       "aisle": "eggmeat",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "nonveg",
       "per100": {
@@ -624,7 +624,7 @@
       "name": "Fish (Rohu)",
       "aisle": "eggmeat",
       "unit": "g",
-      "packSize": 500,
+      "packSize": 250,
       "pantryStaple": false,
       "diet": "nonveg",
       "per100": {

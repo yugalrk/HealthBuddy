@@ -53,6 +53,7 @@ class ScoreWeights {
     this.useStock = 0.8,
     this.waste = 1.6,
     this.topUp = 1.5,
+    this.dietDish = 2.5,
   });
 
   final double protein;
@@ -68,6 +69,14 @@ class ScoreWeights {
   final double disliked;
   final double weekdayPrep;
   final double jitter;
+
+  /// Reward, once a day, for a dish of the household's own diet: meat or
+  /// fish for a non-vegetarian household, eggs for an eggetarian one.
+  ///
+  /// On nutrition alone a dal almost always beats chicken — it brings fibre,
+  /// iron and calcium too — so without this a household that eats meat would
+  /// never be served any. People choose a diet to eat it.
+  final double dietDish;
 
   /// Reward for cooking with a perishable already in the kitchen, weighted
   /// towards stock that would otherwise go off by tomorrow.
@@ -97,6 +106,7 @@ class ScoreWeights {
         useStock: useStock,
         waste: waste,
         topUp: topUp,
+        dietDish: dietDish,
       );
 }
 
@@ -295,6 +305,11 @@ class MealPlanner {
 
   Nutrients _perServing(Recipe r) => _static[r.id]!.perServing;
 
+  /// A dish of the household's own diet, beyond what a vegetarian eats: meat
+  /// or fish for non-vegetarians, eggs for eggetarians.
+  bool _isDietDish(Recipe r) =>
+      profile.diet != DietType.veg && r.diet == profile.diet;
+
   WeekPlan generate({int seed = 0, PlanResume? resume}) {
     final rng = math.Random(seed);
     final dayTarget = householdDailyTargets(profile);
@@ -311,6 +326,9 @@ class MealPlanner {
     final lastUsedDay = <String, int>{};
     final useCount = <String, int>{};
 
+    // Days that already have a dish of the household's own diet.
+    final dietDishDays = <int>{};
+
     final days = <DayPlan>[];
     var carry = Nutrients.zero;
 
@@ -319,6 +337,7 @@ class MealPlanner {
         weekIngredients.addAll(c.recipe.ingredientIds);
         lastUsedDay[c.recipe.id] = d;
         useCount[c.recipe.id] = (useCount[c.recipe.id] ?? 0) + 1;
+        if (_isDietDish(c.recipe)) dietDishDays.add(d);
       }
     }
 
@@ -355,6 +374,7 @@ class MealPlanner {
                 weekIngredients: weekIngredients,
                 lastUsedDay: lastUsedDay,
                 useCount: useCount,
+                wantDietDish: !dietDishDays.contains(d),
                 rng: rng,
               )
             : _planThali(
@@ -368,6 +388,7 @@ class MealPlanner {
                 weekIngredients: weekIngredients,
                 lastUsedDay: lastUsedDay,
                 useCount: useCount,
+                wantDietDish: !dietDishDays.contains(d),
                 rng: rng,
               );
         if (meal == null) continue;
@@ -421,6 +442,7 @@ class MealPlanner {
     required Set<String> weekIngredients,
     required Map<String, int> lastUsedDay,
     required Map<String, int> useCount,
+    required bool wantDietDish,
     required math.Random rng,
   }) {
     final cands = _candidates(slot, RecipeRole.complete, weekday);
@@ -450,6 +472,7 @@ class MealPlanner {
             weekIngredients: weekIngredients,
             lastUsedDay: lastUsedDay,
             useCount: useCount,
+            wantDietDish: wantDietDish,
           ) +
           rng.nextDouble() * weights.jitter;
       if (cost < bestCost) {
@@ -475,6 +498,7 @@ class MealPlanner {
     required Set<String> weekIngredients,
     required Map<String, int> lastUsedDay,
     required Map<String, int> useCount,
+    required bool wantDietDish,
     required math.Random rng,
   }) {
     final mains = _candidates(slot, RecipeRole.main, weekday);
@@ -502,6 +526,7 @@ class MealPlanner {
           weekIngredients: weekIngredients,
           lastUsedDay: lastUsedDay,
           useCount: useCount,
+          wantDietDish: wantDietDish,
         );
 
     // Penalties depend only on which recipes are chosen, never on portion size,
@@ -518,12 +543,19 @@ class MealPlanner {
 
     for (final main in mains) {
       final mainPer = _perServing(main);
-      final mainPen = penaltyOf(main);
+      // The main's portion is part of the search, and so is what it leaves of
+      // a pack: one person can cook a whole 250 g of fish as a larger helping
+      // with less rice, rather than leave half of it to go off.
+      final mainPenAtStandard = penaltyOf(main);
+      final stockAtStandard = _stockCost(main, portions, dayIndex, stock);
 
       for (final mainScale in _mainPortionScales) {
         final mainServings = _snap(portions * mainScale, 4);
         if (mainServings <= 0) continue;
         final mainN = mainPer * mainServings;
+        final mainPen = mainPenAtStandard -
+            stockAtStandard +
+            _stockCost(main, mainServings, dayIndex, stock);
 
         for (final sabzi in sabziOptions) {
           final sabziServings = sabzi == null ? 0.0 : portions;
@@ -616,9 +648,23 @@ class MealPlanner {
     required Set<String> weekIngredients,
     required Map<String, int> lastUsedDay,
     required Map<String, int> useCount,
+    required bool wantDietDish,
   }) {
     final st = _static[r.id]!;
     var cost = 0.0;
+
+    // Only when it can be cooked from a planned shop: a household that shops
+    // twice a week eats fish on the days it is fresh, rather than making an
+    // extra trip for it.
+    if (wantDietDish &&
+        _isDietDish(r) &&
+        !r.lines.any((l) =>
+            stock.tracks(l.ingredientId) &&
+            stock
+                .quote(l.ingredientId, l.qty * portions / r.servings, dayIndex)
+                .topUp)) {
+      cost -= weights.dietDish;
+    }
 
     // Repetition: strongly discourage repeats within two days, mildly
     // discourage anything already used this week.
@@ -659,9 +705,9 @@ class MealPlanner {
   /// proportion to the remainder, less so when there are days left to use it.
   /// Needing an extra shop costs once per recipe.
   ///
-  /// Quantities are taken at the household's standard portion. The main dish's
-  /// portion varies a little in the search, but not enough to change which
-  /// packs get opened.
+  /// Quantities are taken at [portions] servings: the household's standard
+  /// portion, except for a main dish, which is costed at each portion size
+  /// the search tries — a bigger helping can be what finishes a pack.
   double _stockCost(Recipe r, double portions, int day, StockLedger stock) {
     var cost = 0.0;
     var topUp = false;

@@ -76,7 +76,9 @@ limits a week and is set to 180. Items worth a second look before release:
 `packSize` is the smallest amount that can sensibly be bought. For loose vegetables that is a
 *paav* (250 g), because Indian markets sell by the paav and a 500 g minimum made single-person
 weeks waste most of every bag. Whole items that cannot be split keep a whole-item size: a
-cauliflower, a lauki, a small (500 g) papaya.
+cauliflower, a lauki, a small (500 g) papaya. Chicken and fish are bought by weight at the counter, so their
+smallest buy is also 250 g — fish keeps a day, and a 500 g minimum left most of it to spoil for
+one or two people.
 
 ## Limitations to state in-app
 
