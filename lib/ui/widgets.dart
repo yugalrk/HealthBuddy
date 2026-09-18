@@ -156,9 +156,9 @@ String describeDays(Set<int> days) {
 String describeAvoided(
     DayRule r, Map<String, Ingredient> ingredients, DietType diet) {
   final parts = [
-    for (final g in r.groups)
-      // "All non-veg" reads as "no non-veg".
-      if (g.relevantTo(diet)) g.label.toLowerCase().replaceFirst(RegExp('^all '), ''),
+    // "All non-veg" reads as "no non-veg".
+    for (final g in r.forDiet(diet).groups)
+      g.label.toLowerCase().replaceFirst(RegExp('^all '), ''),
     for (final id in r.ingredients) (ingredients[id]?.name ?? id).toLowerCase(),
   ];
   if (parts.isEmpty) return 'Nothing that affects your meals';
@@ -179,7 +179,7 @@ class FoodSearchField extends StatefulWidget {
   const FoodSearchField({
     super.key,
     required this.onChanged,
-    this.hint = 'Search foods — e.g. paneer, spinach, chicken',
+    this.hint = 'Search foods — e.g. paneer, spinach, dal',
   });
 
   final ValueChanged<String> onChanged;

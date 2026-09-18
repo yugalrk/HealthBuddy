@@ -204,7 +204,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         Padding(
           padding: const EdgeInsets.only(bottom: 6),
           child: Text(
-            role.why,
+            role.whyFor(widget.app.profile.diet),
             style: TextStyle(
                 fontSize: 12.5, height: 1.35, color: scheme.onSurfaceVariant),
           ),

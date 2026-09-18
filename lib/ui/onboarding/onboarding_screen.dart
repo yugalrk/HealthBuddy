@@ -147,12 +147,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     };
     return [
       for (final r in _dayRules)
-        DayRule(
-          memberIds: r.memberIds.intersection(ids),
-          weekdays: r.weekdays,
-          groups: r.groups.where((g) => g.relevantTo(diet)).toSet(),
-          ingredients: r.ingredients,
-        ),
+        r.forDiet(diet).copyWith(memberIds: r.memberIds.intersection(ids)),
     ].where((r) => !r.isEmpty).toList();
   }
 
@@ -551,7 +546,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'absolutely. A group, like Dairy, marks every food in it at once.',
       children: [
         FoodSearchField(
-          hint: 'Search foods or groups — e.g. dairy, spinach, chicken',
+          hint: _diet == DietType.nonveg
+              ? 'Search foods or groups — e.g. dairy, spinach, chicken'
+              : 'Search foods or groups — e.g. dairy, spinach, paneer',
           onChanged: (q) => setState(() => _prefQuery = q),
         ),
         const SizedBox(height: 12),
@@ -617,8 +614,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final names = {for (final p in _people) p.id: p.name};
     return _scroll(
       title: 'Any days you avoid certain foods?',
-      subtitle: 'Many families give up meat on a Tuesday, or onion and garlic '
-          'on a fast day. Tell us which days, and those days\' meals leave '
+      subtitle: '${switch (_diet) {
+            DietType.nonveg => 'Many families give up meat on a Tuesday, '
+                'or onion and garlic on a fast day.',
+            DietType.egg => 'Many families give up eggs on a Tuesday, '
+                'or onion and garlic on a fast day.',
+            DietType.veg => 'Many families give up onion and garlic on a '
+                'fast day, or grains and dal during a vrat.',
+          }} Tell us which days, and those days\' meals leave '
           'the food out. Meals are cooked once for everyone, so the whole '
           'table follows the day.',
       children: [
@@ -1189,7 +1192,9 @@ class _DayRuleSheetState extends State<_DayRuleSheet> {
                   const SizedBox(height: 10),
                 ],
                 FoodSearchField(
-                  hint: 'Search foods or groups — e.g. dairy, meat, paneer',
+                  hint: widget.diet == DietType.nonveg
+                      ? 'Search foods or groups — e.g. dairy, meat, paneer'
+                      : 'Search foods or groups — e.g. dairy, dal, paneer',
                   onChanged: (q) => setState(() => _query = q),
                 ),
                 const SizedBox(height: 4),

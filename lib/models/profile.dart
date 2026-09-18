@@ -89,10 +89,16 @@ enum AvoidGroup {
 
   /// Whether the group can appear at all on a [diet] — meat never reaches a
   /// vegetarian plan, so there is nothing to avoid.
+  /// "All non-veg" is offered only to non-vegetarians: for an eggetarian it
+  /// would mean just eggs, which [egg] already says without talking about
+  /// meat.
   bool relevantTo(DietType diet) => switch (this) {
-        AvoidGroup.meat || AvoidGroup.chicken || AvoidGroup.fish =>
+        AvoidGroup.nonVeg ||
+        AvoidGroup.meat ||
+        AvoidGroup.chicken ||
+        AvoidGroup.fish =>
           diet == DietType.nonveg,
-        AvoidGroup.nonVeg || AvoidGroup.egg => diet != DietType.veg,
+        AvoidGroup.egg => diet != DietType.veg,
         _ => true,
       };
 }
@@ -123,6 +129,22 @@ class DayRule {
       memberIds.isEmpty ||
       weekdays.isEmpty ||
       (groups.isEmpty && ingredients.isEmpty);
+
+  /// The rule as it applies on [diet]: groups that cannot reach the plate are
+  /// dropped, and "All non-veg" becomes "Eggs" for an eggetarian, which is
+  /// all it still rules out.
+  DayRule forDiet(DietType diet) => DayRule(
+        memberIds: memberIds,
+        weekdays: weekdays,
+        groups: {
+          for (final g in groups)
+            if (g == AvoidGroup.nonVeg && diet == DietType.egg)
+              AvoidGroup.egg
+            else if (g.relevantTo(diet))
+              g,
+        },
+        ingredients: ingredients,
+      );
 
   DayRule copyWith({Set<String>? memberIds}) => DayRule(
         memberIds: memberIds ?? this.memberIds,

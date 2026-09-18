@@ -454,5 +454,49 @@ void main() {
     expect(rule.groups, {AvoidGroup.pulses, AvoidGroup.nonVeg});
     expect(rule.ingredients, {'baingan'});
   });
+
+  testWidgets('a vegetarian household never sees meat, fish or eggs',
+      (tester) async {
+    final food = loadFood();
+    await tester.pumpWidget(wrap(OnboardingScreen(
+      ingredients: food.ingredients,
+      onComplete: (_) {},
+    )));
+    await tester.pumpAndSettle();
+
+    final nonVeg = RegExp(r'meat|chicken|fish|egg|non-veg|mutton',
+        caseSensitive: false);
+    void expectNoNonVeg(String where) => expect(
+        find.textContaining(nonVeg), findsNothing,
+        reason: 'non-veg wording on $where');
+
+    // Vegetarian is the default diet.
+    while (find.text('Anything you avoid?').evaluate().isEmpty) {
+      await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
+      await tester.pumpAndSettle();
+    }
+    expectNoNonVeg('the avoid-foods page');
+    for (final q in ['meat', 'chicken', 'anda', 'nonveg']) {
+      await tester.enterText(find.byType(TextField), q);
+      await tester.pumpAndSettle();
+      expect(find.byType(FilterChip), findsNothing, reason: q);
+    }
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
+    await tester.pumpAndSettle();
+    expect(find.text('Any days you avoid certain foods?'), findsOneWidget);
+    expectNoNonVeg('the day-rule page');
+    await tester.tap(find.text('Add a day'));
+    await tester.pumpAndSettle();
+    expectNoNonVeg('the day-rule sheet');
+    await tester.scrollUntilVisible(find.byType(TextField), 200,
+        scrollable: find.byType(Scrollable).last);
+    await tester.enterText(find.byType(TextField), 'meat');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Nothing matches'), findsOneWidget);
+  });
+
 }
 

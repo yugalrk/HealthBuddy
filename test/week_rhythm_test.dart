@@ -161,6 +161,18 @@ void main() {
           isTrue);
     });
 
+    test('a no-non-veg day means no eggs to an eggetarian', () {
+      const rule = DayRule(
+          memberIds: {'a'}, weekdays: {1}, groups: {AvoidGroup.nonVeg});
+      expect(rule.forDiet(DietType.egg).groups, {AvoidGroup.egg});
+      expect(rule.forDiet(DietType.nonveg).groups, {AvoidGroup.nonVeg});
+      expect(rule.forDiet(DietType.veg).groups, isEmpty);
+      expect(AvoidGroup.nonVeg.relevantTo(DietType.egg), isFalse);
+      expect(NutrientRole.protein.whyFor(DietType.veg), isNot(contains('meat')));
+      expect(NutrientRole.protein.whyFor(DietType.veg), isNot(contains('egg')));
+      expect(NutrientRole.protein.whyFor(DietType.nonveg), contains('meat'));
+    });
+
     test('rules follow the weekday, whatever day the week starts on', () {
       final p = Profile(members: [_adult], diet: DietType.veg, dayRules: [
         const DayRule(

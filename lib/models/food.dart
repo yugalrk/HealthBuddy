@@ -152,6 +152,18 @@ enum NutrientRole {
       'used, but they are what make the food worth eating.');
 
   const NutrientRole(this.label, this.why);
+
+  /// [why], naming only foods the household eats — a vegetarian list never
+  /// talks about meat.
+  String whyFor(DietType diet) => this != NutrientRole.protein
+      ? why
+      : why.replaceFirst(
+          'Dals, paneer, tofu, soya, egg and meat',
+          switch (diet) {
+            DietType.veg => 'Dals, paneer, tofu and soya',
+            DietType.egg => 'Dals, paneer, tofu, soya and eggs',
+            DietType.nonveg => 'Dals, paneer, tofu, soya, egg and meat',
+          });
   final String label;
   final String why;
 }
