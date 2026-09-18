@@ -11,6 +11,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../data/food_data.dart';
 import '../data/repositories/repositories.dart';
 import '../engine/adapt.dart';
+import '../engine/day_score.dart';
 import '../engine/planner.dart';
 import '../engine/shopping_list.dart';
 import '../engine/stock.dart';
@@ -28,14 +29,17 @@ class AppState extends ChangeNotifier {
   AppState({
     ProfileRepository? profileRepo,
     PlanRepository? planRepo,
+    ScoreRepository? scoreRepo,
     this.useBackgroundIsolate = true,
     DateTime Function()? clock,
   })  : _profileRepo = profileRepo ?? SharedPrefsProfileRepository(),
         _planRepo = planRepo ?? SharedPrefsPlanRepository(),
+        _scoreRepo = scoreRepo ?? SharedPrefsScoreRepository(),
         _clock = clock ?? DateTime.now;
 
   final ProfileRepository _profileRepo;
   final PlanRepository _planRepo;
+  final ScoreRepository _scoreRepo;
   final DateTime Function() _clock;
 
   /// Whether plan generation is pushed onto a background isolate.
@@ -73,6 +77,17 @@ class AppState extends ChangeNotifier {
   Object? _error;
   Object? get error => _error;
 
+  ScoreLog _scores = ScoreLog();
+
+  /// Every day scored from the evening check-in.
+  ScoreLog get scores => _scores;
+
+  /// Today, at midnight.
+  DateTime get today {
+    final n = _clock();
+    return DateTime(n.year, n.month, n.day);
+  }
+
   Future<void> init() async {
     try {
       final ingredientsJson =
@@ -101,6 +116,8 @@ class AppState extends ChangeNotifier {
 
       _saved = await _planRepo.load();
       if (_saved != null) await _restore(_saved!);
+      _scores = await _scoreRepo.load();
+      await _scoreReportedDays();
       _state = LoadState.ready;
     } catch (e) {
       _error = e;
@@ -240,7 +257,41 @@ class AppState extends ChangeNotifier {
     );
     final today = todayIndex.clamp(0, 6);
     final through = fb.dayIndex > today ? fb.dayIndex : today;
+    // Scored from the plan as it stood that day, before replanning.
+    _scores.put(scoreFor(fb));
+    await _scoreRepo.save(_scores);
     await _adapt(throughDay: through, latest: fb);
+  }
+
+  /// Your score for the day [fb] reports.
+  ///
+  /// The check-in is for the household, so your share of what was eaten is
+  /// taken in proportion to your needs: the plan sizes everyone's portions
+  /// the same way. Junk snacks are yours alone.
+  DayScore scoreFor(DayFeedback fb) {
+    final day = plan!.days[fb.dayIndex];
+    final you = targetsForMember(profile.primary, profile.diet);
+    final all = dailyTargets;
+    final share = all.kcal <= 0 ? 1.0 : you.kcal / all.kcal;
+    return scoreDay(
+      date: dateOf(fb.dayIndex),
+      eaten: fb.eaten(day, food.ingredients) * share,
+      target: you,
+      junkSnacks: fb.junkSnacks,
+    );
+  }
+
+  /// Days reported before scoring existed get their score on first launch.
+  Future<void> _scoreReportedDays() async {
+    final p = _progress;
+    if (p == null) return;
+    var added = false;
+    for (final fb in p.feedback.values) {
+      if (_scores.on(dateOf(fb.dayIndex)) != null) continue;
+      _scores.put(scoreFor(fb));
+      added = true;
+    }
+    if (added) await _scoreRepo.save(_scores);
   }
 
   Future<void> _adapt({
@@ -310,6 +361,8 @@ class AppState extends ChangeNotifier {
   Future<void> resetAll() async {
     await _profileRepo.clear();
     await _planRepo.clear();
+    await _scoreRepo.clear();
+    _scores = ScoreLog();
     _profile = null;
     _progress = null;
     _saved = null;

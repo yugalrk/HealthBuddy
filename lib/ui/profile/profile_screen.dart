@@ -7,6 +7,7 @@ import '../../models/food.dart';
 import '../../state/app_state.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../widgets.dart';
+import 'day_scores.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key, required this.app});
@@ -24,6 +25,9 @@ class ProfileScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList.list(
             children: [
+              const SectionHeader('Your days'),
+              DayScoresCard(app: app),
+              const SectionHeader('Household'),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),

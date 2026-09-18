@@ -15,6 +15,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../engine/day_score.dart';
 import '../../models/profile.dart';
 
 abstract class ProfileRepository {
@@ -101,8 +102,17 @@ abstract class PlanRepository {
   Future<void> clear();
 }
 
+/// Scored days. Kept apart from the week, which is replaced every seven
+/// days, so the history outlives it.
+abstract class ScoreRepository {
+  Future<ScoreLog> load();
+  Future<void> save(ScoreLog log);
+  Future<void> clear();
+}
+
 const _profileKey = 'healthbuddy.profile.v1';
 const _weekKey = 'healthbuddy.week.v1';
+const _scoresKey = 'healthbuddy.scores.v1';
 
 class SharedPrefsProfileRepository implements ProfileRepository {
   @override
@@ -157,5 +167,32 @@ class SharedPrefsPlanRepository implements PlanRepository {
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_weekKey);
+  }
+}
+
+class SharedPrefsScoreRepository implements ScoreRepository {
+  @override
+  Future<ScoreLog> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_scoresKey);
+    if (raw == null) return ScoreLog();
+    try {
+      return ScoreLog.fromJson(json.decode(raw) as List<dynamic>);
+    } catch (_) {
+      await prefs.remove(_scoresKey);
+      return ScoreLog();
+    }
+  }
+
+  @override
+  Future<void> save(ScoreLog log) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_scoresKey, json.encode(log.toJson()));
+  }
+
+  @override
+  Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_scoresKey);
   }
 }

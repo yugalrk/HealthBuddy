@@ -374,10 +374,11 @@ class _DayCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          feedback!.followedFully
-                              ? 'Went to plan'
-                              : 'Changed from the plan — the figures show what '
-                                  'was actually eaten',
+                          '${feedback!.followedFully ? 'Went to plan' : 'Changed from the plan — the figures show what the household ate'}'
+                          '${() {
+                            final sc = app.scores.on(app.dateOf(day.dayIndex));
+                            return sc == null ? '' : ' · your score ${sc.score}/100';
+                          }()}',
                           style: TextStyle(
                               fontSize: 12.5, color: scheme.onSurfaceVariant),
                         ),
@@ -492,10 +493,11 @@ class _FeedbackPrompt extends StatelessWidget {
     final before = app.lastAdaptation;
     await app.recordFeedback(fb);
     final after = app.lastAdaptation;
+    final score = app.scores.on(app.dateOf(fb.dayIndex))?.score;
     messenger.showSnackBar(SnackBar(
-      content: Text(after != null && !identical(after, before)
-          ? 'Adjusted the rest of the week'
-          : 'Thanks — the plan stays as it is'),
+      content: Text(
+          '${score == null ? '' : 'Your score: $score/100 · '}'
+          '${after != null && !identical(after, before) ? 'Adjusted the rest of the week' : 'The plan stays as it is'}'),
     ));
   }
 }
@@ -513,6 +515,7 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
   late final Map<MealType, MealOutcome> _outcomes = {
     for (final m in widget.day.meals) m.type: MealOutcome.asPlanned
   };
+  int _junk = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -584,10 +587,39 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
               ),
             ),
           ],
+          const SizedBox(height: 22),
+          const Text('Junk snacks you had',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 2),
+          Text(
+            'Chips, samosas, sweets, biscuits or a soft drink — anything '
+            'extra. Just yours; it counts toward your day\'s score.',
+            style: TextStyle(
+                fontSize: 12.5, height: 1.35, color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final (n, label) in [
+                (0, 'None'),
+                (1, '1'),
+                (2, '2'),
+                (3, '3 or more'),
+              ])
+                ChoiceChip(
+                  label: Text(label),
+                  selected: _junk == n,
+                  onSelected: (_) => setState(() => _junk = n),
+                ),
+            ],
+          ),
           const SizedBox(height: 20),
           FilledButton(
-            onPressed: () => Navigator.of(context)
-                .pop(DayFeedback(widget.day.dayIndex, {..._outcomes})),
+            onPressed: () => Navigator.of(context).pop(DayFeedback(
+                widget.day.dayIndex, {..._outcomes},
+                junkSnacks: _junk)),
             child: const Text('Save'),
           ),
         ],

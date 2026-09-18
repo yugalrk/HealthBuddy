@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:healthbuddy/data/food_data.dart';
 import 'package:healthbuddy/data/repositories/repositories.dart';
+import 'package:healthbuddy/engine/day_score.dart';
 import 'package:healthbuddy/models/food.dart';
 import 'package:healthbuddy/models/plan.dart';
 import 'package:healthbuddy/models/profile.dart';
@@ -23,6 +24,16 @@ class FakeProfileRepo implements ProfileRepository {
   Future<void> save(Profile p) async => _p = p;
   @override
   Future<void> clear() async => _p = null;
+}
+
+class FakeScoreRepo implements ScoreRepository {
+  ScoreLog log = ScoreLog();
+  @override
+  Future<ScoreLog> load() async => log;
+  @override
+  Future<void> save(ScoreLog l) async => log = l;
+  @override
+  Future<void> clear() async => log = ScoreLog();
 }
 
 class FakePlanRepo implements PlanRepository {
@@ -107,6 +118,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(sampleProfile()),
       planRepo: FakePlanRepo(),
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
       // A Monday morning, so the week starts on Monday.
       clock: () => DateTime(2026, 9, 21, 9),
@@ -150,6 +162,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(sampleProfile()),
       planRepo: FakePlanRepo(),
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
     );
     await tester.runAsync(() async {
@@ -170,6 +183,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(),
       planRepo: FakePlanRepo(),
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
     );
     await tester.runAsync(app.init);
@@ -222,6 +236,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(sampleProfile()),
       planRepo: repo,
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
       clock: () => now,
     );
@@ -255,6 +270,7 @@ void main() {
     final reopened = AppState(
       profileRepo: FakeProfileRepo(sampleProfile()),
       planRepo: repo,
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
       clock: () => now,
     );
@@ -272,6 +288,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(sampleProfile()),
       planRepo: FakePlanRepo(),
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
       clock: () => now,
     );
@@ -317,6 +334,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(profile),
       planRepo: FakePlanRepo(),
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
       clock: () => now,
     );
@@ -504,6 +522,7 @@ void main() {
     final app = AppState(
       profileRepo: FakeProfileRepo(sampleProfile()),
       planRepo: FakePlanRepo(),
+      scoreRepo: FakeScoreRepo(),
       useBackgroundIsolate: false,
       clock: () => DateTime(2026, 9, 21, 9),
     );
@@ -526,6 +545,8 @@ void main() {
 
     await tester.tap(find.text('Household').last);
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Already at home'), 200,
+        scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Already at home'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).last, 'salt');
@@ -533,6 +554,120 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'Salt'));
     await tester.pumpAndSettle();
     expect(app.profile.pantry, contains('salt'));
+  });
+
+
+  testWidgets('the evening check-in scores the day, shown under Your days',
+      (tester) async {
+    final now = DateTime(2026, 9, 21, 20);
+    final scores = FakeScoreRepo();
+    final app = AppState(
+      profileRepo: FakeProfileRepo(sampleProfile()),
+      planRepo: FakePlanRepo(),
+      scoreRepo: scores,
+      useBackgroundIsolate: false,
+      clock: () => now,
+    );
+    await tester.runAsync(() async {
+      await app.init();
+      await app.generateNewWeek(seed: 7);
+    });
+
+    // Before any check-in, the Household tab explains how scoring works.
+    await tester.pumpWidget(wrap(live(app)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Household').last);
+    await tester.pumpAndSettle();
+    expect(find.text('YOUR DAYS'), findsOneWidget);
+    expect(find.textContaining('gets a score out of 100'), findsOneWidget);
+
+    // Check in through the sheet: meals as planned, two junk snacks.
+    await tester.tap(find.text('Plan').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Something changed'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('3 or more'), 200,
+        scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.widgetWithText(ChoiceChip, '2'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+
+    final today = app.scores.on(DateTime(2026, 9, 21))!;
+    expect(today.junkSnacks, 2);
+    expect(today.misses, contains('2 junk snacks'));
+    expect(scores.log.days, hasLength(1), reason: 'saved');
+    expect(find.textContaining('Your score: ${today.score}/100'),
+        findsOneWidget);
+
+    // The same day as planned, without junk, scores higher.
+    final clean = app.scoreFor(DayFeedback(0, {
+      for (final m in app.plan!.days[0].meals) m.type: MealOutcome.asPlanned
+    }));
+    expect(clean.score, greaterThanOrEqualTo(today.score + 20));
+    // Skipping lunch and dinner costs points too.
+    final skipped = app.scoreFor(const DayFeedback(0, {
+      MealType.lunch: MealOutcome.skipped,
+      MealType.dinner: MealOutcome.skipped,
+    }));
+    expect(skipped.score, lessThan(clean.score - 20));
+    expect(skipped.misses.first, anyOf(startsWith('Protein'), startsWith('Calories')));
+
+    // Shown on the Household tab; tapping it explains the points.
+    await tester.tap(find.text('Household').last);
+    await tester.pumpAndSettle();
+    expect(find.text('${today.score}'), findsWidgets);
+    expect(find.text('Today'), findsOneWidget);
+    await tester.tap(find.text('Today'));
+    await tester.pumpAndSettle();
+    expect(find.text('Where the points went'), findsOneWidget);
+    expect(find.text('• 2 junk snacks'), findsOneWidget);
+    expect(find.text('0 / 20'), findsOneWidget); // no-junk points
+
+    // Changing the answer replaces the day's score rather than adding one.
+    await tester.runAsync(() => app.recordFeedback(DayFeedback(0, {
+          for (final m in app.plan!.days[0].meals)
+            m.type: MealOutcome.asPlanned
+        })));
+    expect(app.scores.days, hasLength(1));
+    expect(app.scores.on(DateTime(2026, 9, 21))!.junkSnacks, 0);
+
+    // Reset clears the history.
+    await tester.runAsync(app.resetAll);
+    expect(app.scores.isEmpty, isTrue);
+    expect(scores.log.isEmpty, isTrue);
+  });
+
+  testWidgets('days reported before scoring existed are scored on launch',
+      (tester) async {
+    final plans = FakePlanRepo();
+    final first = AppState(
+      profileRepo: FakeProfileRepo(sampleProfile()),
+      planRepo: plans,
+      scoreRepo: FakeScoreRepo(),
+      useBackgroundIsolate: false,
+      clock: () => DateTime(2026, 9, 21, 20),
+    );
+    await tester.runAsync(() async {
+      await first.init();
+      await first.generateNewWeek(seed: 3);
+      await first.recordFeedback(
+          const DayFeedback(0, {MealType.lunch: MealOutcome.half}));
+    });
+
+    // A fresh score history, as after updating the app.
+    final scores = FakeScoreRepo();
+    final later = AppState(
+      profileRepo: FakeProfileRepo(sampleProfile()),
+      planRepo: plans,
+      scoreRepo: scores,
+      useBackgroundIsolate: false,
+      clock: () => DateTime(2026, 9, 22, 9),
+    );
+    await tester.runAsync(later.init);
+    expect(later.scores.on(DateTime(2026, 9, 21)), isNotNull);
+    expect(scores.log.days, hasLength(1));
   });
 
 }

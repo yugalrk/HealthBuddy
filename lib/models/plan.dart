@@ -260,9 +260,13 @@ enum MealOutcome {
 /// The household's end-of-day answer about how closely a day's plan was
 /// followed. A meal with no answer is taken as eaten as planned.
 class DayFeedback {
-  const DayFeedback(this.dayIndex, this.meals);
+  const DayFeedback(this.dayIndex, this.meals, {this.junkSnacks = 0});
   final int dayIndex;
   final Map<MealType, MealOutcome> meals;
+
+  /// Junk snacks you had on top of the plan — chips, samosas, sweets, soft
+  /// drinks. They count against that day's score, not the household's plan.
+  final int junkSnacks;
 
   MealOutcome outcomeOf(MealType t) => meals[t] ?? MealOutcome.asPlanned;
 
@@ -289,6 +293,7 @@ class DayFeedback {
   Map<String, dynamic> toJson() => {
         'day': dayIndex,
         'meals': {for (final e in meals.entries) e.key.name: e.value.name},
+        if (junkSnacks > 0) 'junk': junkSnacks,
       };
 
   static DayFeedback fromJson(Map<String, dynamic> j) => DayFeedback(
@@ -297,5 +302,6 @@ class DayFeedback {
           for (final e in (j['meals'] as Map<String, dynamic>).entries)
             MealType.parse(e.key): MealOutcome.values.byName(e.value as String)
         },
+        junkSnacks: j['junk'] as int? ?? 0,
       );
 }

@@ -42,18 +42,23 @@ went. If a meal was skipped, halved or eaten out, the rest of the week is
 planned again: part of the shortfall is made up (at most 20% a day), and the
 food bought for the missed meal is cooked before it goes off.
 
+**It scores your days.** The evening check-in also asks about junk snacks,
+and each day gets a score out of 100: full marks for hitting your protein,
+calories, fibre, iron and calcium with no junk. Scores, the week's proper days
+(85 or more) and your streak are on the Household tab.
+
 ## Layout
 
 ```
 lib/
   models/     profile, food (ingredient/recipe/nutrients), plan
   engine/     targets, planner, stock, adapt,
-              shopping_list                        <- pure Dart, no Flutter
+              shopping_list, day_score             <- pure Dart, no Flutter
   data/       food_data.dart, repositories/
   state/      app_state.dart
   ui/         onboarding, plan, shopping, nutrition, profile
 assets/seed/  ingredients.json, recipes.json
-test/         91 tests
+test/         106 tests
 tool/         demo_plan, spoilage_report, diagnose, bench, make_icons
 docs/         NUTRITION_SOURCES.md, RELEASE.md
 store/        listing copy, privacy policy, graphics
