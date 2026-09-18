@@ -19,7 +19,7 @@ class ProfileScreen extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        const SliverAppBar.large(title: Text('Your household')),
+        const SliverAppBar(pinned: true, title: Text('Your household')),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList.list(
@@ -149,42 +149,25 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SectionHeader('Pantry'),
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Anything you tick here is dropped from the shopping '
-                        'list entirely.',
-                        style: TextStyle(
-                            fontSize: 12.5,
-                            height: 1.35,
-                            color: scheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: [
-                          for (final ing in _pantryCandidates())
-                            FilterChip(
-                              label: Text(ing.name,
-                                  style: const TextStyle(fontSize: 12)),
-                              selected: p.pantry.contains(ing.id),
-                              onSelected: (sel) {
-                                final next = {...p.pantry};
-                                if (sel) {
-                                  next.add(ing.id);
-                                } else {
-                                  next.remove(ing.id);
-                                }
-                                app.updateProfile(p.copyWith(pantry: next));
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Icon(Icons.kitchen_outlined, color: scheme.primary),
+                  title: const Text('Already at home'),
+                  subtitle: Text(
+                    p.pantry.isEmpty
+                        ? 'Tick staples you keep stocked, like salt or atta, '
+                            'to leave them off the shopping list.'
+                        : '${p.pantry.length} '
+                            '${p.pantry.length == 1 ? 'staple' : 'staples'} left '
+                            'off the shopping list',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) =>
+                        _PantrySheet(app: app, foods: _pantryCandidates()),
                   ),
                 ),
               ),
@@ -298,5 +281,78 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
     if (ok == true) await app.resetAll();
+  }
+}
+
+/// Picking the staples already at home, with a search for the long list.
+class _PantrySheet extends StatefulWidget {
+  const _PantrySheet({required this.app, required this.foods});
+  final AppState app;
+  final List<Ingredient> foods;
+
+  @override
+  State<_PantrySheet> createState() => _PantrySheetState();
+}
+
+class _PantrySheetState extends State<_PantrySheet> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListenableBuilder(
+      listenable: widget.app,
+      builder: (context, _) {
+        final p = widget.app.profile;
+        final shown =
+            widget.foods.where((i) => matchesSearch(i, _query)).toList();
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.8,
+          maxChildSize: 0.95,
+          builder: (context, controller) => ListView(
+            controller: controller,
+            padding: EdgeInsets.fromLTRB(
+                20, 20, 20, 24 + MediaQuery.of(context).viewInsets.bottom),
+            children: [
+              const Text('Already at home',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              Text(
+                'Ticked items are left off the shopping list entirely.',
+                style: TextStyle(
+                    fontSize: 13, color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 14),
+              FoodSearchField(
+                hint: 'Search — e.g. salt, atta, ghee',
+                onChanged: (q) => setState(() => _query = q),
+              ),
+              const SizedBox(height: 12),
+              if (shown.isEmpty)
+                NoSearchMatches(_query)
+              else
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final ing in shown)
+                      FilterChip(
+                        label: Text(ing.name,
+                            style: const TextStyle(fontSize: 12.5)),
+                        selected: p.pantry.contains(ing.id),
+                        onSelected: (sel) {
+                          final next = {...p.pantry};
+                          sel ? next.add(ing.id) : next.remove(ing.id);
+                          widget.app.updateProfile(p.copyWith(pantry: next));
+                        },
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

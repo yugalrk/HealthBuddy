@@ -52,9 +52,16 @@ ThemeData buildTheme(Brightness brightness) {
 }
 
 /// Colour used for a nutrient depending on how close it is to target.
-Color nutrientStatusColor(ColorScheme scheme, double ratio) {
+///
+/// With [overIsFine] — protein, fibre, iron, calcium — going over is shown as
+/// good, not as a warning: only falling short of those is a problem.
+Color nutrientStatusColor(ColorScheme scheme, double ratio,
+    {bool overIsFine = false}) {
+  final good = scheme.brightness == Brightness.dark
+      ? const Color(0xFF6FCF97)
+      : const Color(0xFF2E7D52);
   if (ratio < 0.85) return scheme.error;
   if (ratio < 0.95) return const Color(0xFFE08A00);
-  if (ratio <= 1.25) return const Color(0xFF2E7D52);
+  if (ratio <= 1.25 || overIsFine) return good;
   return const Color(0xFFE08A00);
 }

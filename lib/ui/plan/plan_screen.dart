@@ -9,9 +9,19 @@ import '../../models/plan.dart';
 import '../../state/app_state.dart';
 import '../widgets.dart';
 
-class PlanScreen extends StatelessWidget {
+class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key, required this.app});
   final AppState app;
+
+  @override
+  State<PlanScreen> createState() => _PlanScreenState();
+}
+
+class _PlanScreenState extends State<PlanScreen> {
+  /// Day picked in the strip; null follows today.
+  int? _picked;
+
+  AppState get app => widget.app;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +36,15 @@ class PlanScreen extends StatelessWidget {
     final pending = app.pendingFeedbackDay;
     final adaptation = app.lastAdaptation;
 
+    final shown = (_picked ?? app.todayIndex).clamp(0, plan.days.length - 1);
+    final day = plan.days[shown];
+    void pick(int i) => setState(
+        () => _picked = i.clamp(0, plan.days.length - 1).toInt());
+
     return CustomScrollView(
       slivers: [
-        SliverAppBar.large(
+        SliverAppBar(
+          pinned: true,
           title: const Text('This week'),
           actions: [
             IconButton(
@@ -55,14 +71,34 @@ class PlanScreen extends StatelessWidget {
           ]),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          sliver: SliverList.builder(
-            itemCount: plan.days.length,
-            itemBuilder: (context, i) => _DayCard(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+          sliver: SliverToBoxAdapter(
+            child: _DayStrip(
               app: app,
-              day: plan.days[i],
-              dayTarget: dayTarget,
-              feedback: progress.feedback[plan.days[i].dayIndex],
+              days: plan.days,
+              selected: shown,
+              reported: progress.feedback.keys.toSet(),
+              onPick: pick,
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          sliver: SliverToBoxAdapter(
+            // Swipe sideways for the next or previous day.
+            child: GestureDetector(
+              onHorizontalDragEnd: (d) {
+                final v = d.primaryVelocity ?? 0;
+                if (v < -200) pick(shown + 1);
+                if (v > 200) pick(shown - 1);
+              },
+              child: _DayCard(
+                key: ValueKey(shown),
+                app: app,
+                day: day,
+                dayTarget: dayTarget,
+                feedback: progress.feedback[day.dayIndex],
+              ),
             ),
           ),
         ),
@@ -104,8 +140,111 @@ String _dayWord(AppState app, DayPlan day) {
   return day.dayName;
 }
 
+/// The week at a glance: one tap-target per day, today ringed, the chosen day
+/// filled. A dot marks a day with a food rule; a tick, a day already reported.
+class _DayStrip extends StatelessWidget {
+  const _DayStrip({
+    required this.app,
+    required this.days,
+    required this.selected,
+    required this.reported,
+    required this.onPick,
+  });
+  final AppState app;
+  final List<DayPlan> days;
+  final int selected;
+  final Set<int> reported;
+  final ValueChanged<int> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        for (final d in days)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: () {
+                final isSel = d.dayIndex == selected;
+                final isToday = d.dayIndex == app.todayIndex;
+                final hasRule = app.profile.rulesOn(d.weekday).isNotEmpty;
+                final fg = isSel ? scheme.onPrimary : scheme.onSurface;
+                return Semantics(
+                  button: true,
+                  selected: isSel,
+                  label: '${d.dayName} ${formatShortDate(app.dateOf(d.dayIndex))}'
+                      '${isToday ? ', today' : ''}',
+                  child: Material(
+                    color: isSel ? scheme.primary : scheme.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: isToday && !isSel
+                          ? BorderSide(color: scheme.primary, width: 1.5)
+                          : BorderSide.none,
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => onPick(d.dayIndex),
+                      child: SizedBox(
+                        height: 64,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              d.dayName.substring(0, 3),
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: isSel
+                                      ? fg
+                                      : scheme.onSurfaceVariant),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${app.dateOf(d.dayIndex).day}',
+                              style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  color: fg),
+                            ),
+                            SizedBox(
+                              height: 12,
+                              child: reported.contains(d.dayIndex)
+                                  ? Icon(Icons.check,
+                                      size: 12,
+                                      color: isSel ? fg : scheme.primary)
+                                  : hasRule
+                                      ? Center(
+                                          child: Container(
+                                            width: 5,
+                                            height: 5,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: isSel
+                                                  ? fg
+                                                  : scheme.tertiary,
+                                            ),
+                                          ),
+                                        )
+                                      : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }(),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _DayCard extends StatelessWidget {
   const _DayCard({
+    super.key,
     required this.app,
     required this.day,
     required this.dayTarget,
@@ -171,7 +310,8 @@ class _DayCard extends StatelessWidget {
                         scheme.onSecondaryContainer),
                   Expanded(
                     child: Text(
-                      '${n.kcal.round()} kcal · ${n.protein.round()}g P',
+                      '${groupDigits(n.kcal)} kcal · '
+                      '${groupDigits(n.protein)} g protein',
                       textAlign: TextAlign.right,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -182,7 +322,17 @@ class _DayCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              if (app.profile.householdSize > 1)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    'Amounts and totals for all '
+                    '${app.profile.householdSize} of you',
+                    style: TextStyle(
+                        fontSize: 12, color: scheme.onSurfaceVariant),
+                  ),
+                ),
+              const SizedBox(height: 6),
               LinearProgressIndicator(
                 value: ratio.clamp(0.0, 1.0).toDouble(),
                 minHeight: 3,
@@ -631,7 +781,9 @@ class _MealRow extends StatelessWidget {
                     ),
                   if (amounts.flavour.isNotEmpty)
                     Text(
-                      '+ ${amounts.flavour.length} spices & seasonings',
+                      amounts.flavour.length == 1
+                          ? '+ 1 spice or seasoning'
+                          : '+ ${amounts.flavour.length} spices & seasonings',
                       style: TextStyle(
                           fontSize: 12, color: scheme.onSurfaceVariant),
                     ),

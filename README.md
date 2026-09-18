@@ -53,7 +53,7 @@ lib/
   state/      app_state.dart
   ui/         onboarding, plan, shopping, nutrition, profile
 assets/seed/  ingredients.json, recipes.json
-test/         90 tests
+test/         91 tests
 tool/         demo_plan, spoilage_report, diagnose, bench, make_icons
 docs/         NUTRITION_SOURCES.md, RELEASE.md
 store/        listing copy, privacy policy, graphics

@@ -47,7 +47,10 @@ class ShoppingItem {
   /// Shown as secondary text when buying more than the recipes need.
   String? get overageLabel {
     if (buyQty <= neededQty * 1.05) return null;
-    return 'recipes need ${_formatQty(neededQty, ingredient.unit)}';
+    // Rounded like a kitchen scale reads: 281.3 g is "about 280 g".
+    final step = neededQty < 100 ? 5.0 : (neededQty < 1000 ? 10.0 : 50.0);
+    final rounded = math.max(step, (neededQty / step).round() * step);
+    return 'the week uses about ${_formatQty(rounded, ingredient.unit)}';
   }
 
   static String _formatQty(double qty, String unit) {

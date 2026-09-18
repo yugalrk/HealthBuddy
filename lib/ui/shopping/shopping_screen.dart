@@ -64,7 +64,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 
     return CustomScrollView(
       slivers: [
-        SliverAppBar.large(
+        SliverAppBar(
+          pinned: true,
           title: const Text('Shopping list'),
           actions: [
             IconButton(
@@ -133,12 +134,6 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               const SizedBox(height: 12),
               _DailyCard(items: list.daily),
             ],
-            if (list.spoilage.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _SpoilageCard(list: list, app: app),
-            ],
-            const SizedBox(height: 12),
-            _CoverageCard(list: list, app: app),
             const SizedBox(height: 16),
             SegmentedButton<_GroupMode>(
               segments: const [
@@ -159,12 +154,24 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           ]),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           sliver: SliverList.list(
             children: _mode == _GroupMode.aisle
                 ? _aisleSections(list, trip, checked, scheme)
                 : _nutritionSections(list, checked, scheme),
           ),
+        ),
+        // The list comes first; what it adds up to, and what may be left
+        // over, follow it for anyone who wants the detail.
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+          sliver: SliverList.list(children: [
+            if (list.spoilage.isNotEmpty) ...[
+              _SpoilageCard(list: list, app: app),
+              const SizedBox(height: 12),
+            ],
+            _CoverageCard(list: list, app: app),
+          ]),
         ),
       ],
     );
@@ -453,7 +460,8 @@ class _CoverageCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Cook whatever you like from these ingredients — this is what '
-              'they add up to against your household\'s week.',
+              'they add up to, as a share of what your household needs '
+              'this week.',
               style: TextStyle(
                   fontSize: 12.5, height: 1.35, color: scheme.onSurfaceVariant),
             ),
@@ -466,6 +474,7 @@ class _CoverageCard extends StatelessWidget {
                 unit: 'g'),
             _CoverRow(
                 label: 'Energy',
+                overIsFine: false,
                 ratio: cover.kcal,
                 got: provides.kcal,
                 need: need.kcal,
@@ -550,17 +559,19 @@ class _CoverRow extends StatelessWidget {
     required this.got,
     required this.need,
     required this.unit,
+    this.overIsFine = true,
   });
   final String label;
   final double ratio;
   final double got;
   final double need;
   final String unit;
+  final bool overIsFine;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = nutrientStatusColor(scheme, ratio);
+    final color = nutrientStatusColor(scheme, ratio, overIsFine: overIsFine);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -583,11 +594,17 @@ class _CoverRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           SizedBox(
-            width: 92,
-            child: Text(
-              '${got.round()} / ${need.round()} $unit',
-              textAlign: TextAlign.right,
-              style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+            width: 52,
+            child: Semantics(
+              label: '${groupDigits(got)} of ${groupDigits(need)} $unit',
+              child: Text(
+                '${(ratio * 100).round()}%',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurfaceVariant),
+              ),
             ),
           ),
         ],

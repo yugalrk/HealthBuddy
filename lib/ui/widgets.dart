@@ -16,6 +16,7 @@ class NutrientBar extends StatelessWidget {
     required this.target,
     required this.unit,
     this.caption,
+    this.overIsFine = false,
   });
 
   final String label;
@@ -24,11 +25,15 @@ class NutrientBar extends StatelessWidget {
   final String unit;
   final String? caption;
 
+  /// Going over is fine (protein, fibre, iron, calcium), so it is not
+  /// coloured as a warning.
+  final bool overIsFine;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final ratio = target <= 0 ? 1.0 : planned / target;
-    final color = nutrientStatusColor(scheme, ratio);
+    final color = nutrientStatusColor(scheme, ratio, overIsFine: overIsFine);
     final pct = ((ratio - 1) * 100);
 
     return Padding(
@@ -43,7 +48,7 @@ class NutrientBar extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
               Text(
-                '${planned.round()} / ${target.round()} $unit',
+                '${groupDigits(planned)} / ${groupDigits(target)} $unit',
                 style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
               ),
               const SizedBox(width: 8),
@@ -104,7 +109,7 @@ class MacroRow extends StatelessWidget {
     return Wrap(
       spacing: 12,
       children: [
-        Text('${n.kcal.round()} kcal', style: style),
+        Text('${groupDigits(n.kcal)} kcal', style: style),
         Text('P ${n.protein.round()}g', style: style),
         Text('F ${n.fat.round()}g', style: style),
         Text('C ${n.carb.round()}g', style: style),
@@ -170,6 +175,18 @@ const _months = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
+
+/// A rounded number with thousands separators: 41826.4 -> "41,826".
+String groupDigits(num v) {
+  final n = v.round();
+  final digits = n.abs().toString();
+  final out = StringBuffer(n < 0 ? '-' : '');
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) out.write(',');
+    out.write(digits[i]);
+  }
+  return out.toString();
+}
 
 /// "22 Sep".
 String formatShortDate(DateTime d) => '${d.day} ${_months[d.month - 1]}';

@@ -24,7 +24,7 @@ class NutritionScreen extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        const SliverAppBar.large(title: Text('Nutrition')),
+        const SliverAppBar(pinned: true, title: Text('Nutrition')),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           sliver: SliverList.list(
@@ -65,7 +65,8 @@ class NutritionScreen extends StatelessWidget {
                           label: 'Protein',
                           planned: planned.protein,
                           target: target.protein,
-                          unit: 'g'),
+                          unit: 'g',
+                          overIsFine: true),
                       NutrientBar(
                           label: 'Fat',
                           planned: planned.fat,
@@ -80,7 +81,8 @@ class NutritionScreen extends StatelessWidget {
                           label: 'Fibre',
                           planned: planned.fibre,
                           target: target.fibre,
-                          unit: 'g'),
+                          unit: 'g',
+                          overIsFine: true),
                     ],
                   ),
                 ),
@@ -94,6 +96,7 @@ class NutritionScreen extends StatelessWidget {
                     children: [
                       NutrientBar(
                         label: 'Iron',
+                        overIsFine: true,
                         planned: planned.iron,
                         target: target.iron,
                         unit: 'mg',
@@ -104,6 +107,7 @@ class NutritionScreen extends StatelessWidget {
                       ),
                       NutrientBar(
                         label: 'Calcium',
+                        overIsFine: true,
                         planned: planned.calcium,
                         target: target.calcium,
                         unit: 'mg',

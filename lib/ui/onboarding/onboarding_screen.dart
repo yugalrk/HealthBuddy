@@ -175,7 +175,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   )
                 : null)
             : IconButton(icon: const Icon(Icons.arrow_back), onPressed: _back),
-        title: Text(widget.initial == null ? 'Set up' : 'Edit profile'),
+        title: Text(
+          '${widget.initial == null ? 'Set up' : 'Edit profile'} · '
+          'step ${_page + 1} of $_pageCount',
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
           child: LinearProgressIndicator(
@@ -547,8 +550,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       children: [
         FoodSearchField(
           hint: _diet == DietType.nonveg
-              ? 'Search foods or groups — e.g. dairy, spinach, chicken'
-              : 'Search foods or groups — e.g. dairy, spinach, paneer',
+              ? 'e.g. dairy, spinach, chicken'
+              : 'e.g. dairy, spinach, paneer',
           onChanged: (q) => setState(() => _prefQuery = q),
         ),
         const SizedBox(height: 12),
@@ -1193,8 +1196,8 @@ class _DayRuleSheetState extends State<_DayRuleSheet> {
                 ],
                 FoodSearchField(
                   hint: widget.diet == DietType.nonveg
-                      ? 'Search foods or groups — e.g. dairy, meat, paneer'
-                      : 'Search foods or groups — e.g. dairy, dal, paneer',
+                      ? 'e.g. dairy, meat, paneer'
+                      : 'e.g. dairy, dal, paneer',
                   onChanged: (q) => setState(() => _query = q),
                 ),
                 const SizedBox(height: 4),

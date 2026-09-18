@@ -353,7 +353,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('By nutrition'), 200,
         scrollable: find.byType(Scrollable).first);
-    await tester.drag(find.byType(CustomScrollView).first, const Offset(0, -250));
+    await tester.ensureVisible(find.text('By nutrition'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('By nutrition'));
     await tester.pumpAndSettle();
@@ -496,6 +496,43 @@ void main() {
     await tester.enterText(find.byType(TextField), 'meat');
     await tester.pumpAndSettle();
     expect(find.textContaining('Nothing matches'), findsOneWidget);
+  });
+
+
+  testWidgets('the week strip picks a day, and the pantry opens as a sheet',
+      (tester) async {
+    final app = AppState(
+      profileRepo: FakeProfileRepo(sampleProfile()),
+      planRepo: FakePlanRepo(),
+      useBackgroundIsolate: false,
+      clock: () => DateTime(2026, 9, 21, 9),
+    );
+    await tester.runAsync(() async {
+      await app.init();
+      await app.generateNewWeek(seed: 2);
+    });
+    await tester.pumpWidget(wrap(live(app)));
+    await tester.pumpAndSettle();
+
+    // Opens on today, one day at a time.
+    final today = app.plan!.days[app.todayIndex].dayName;
+    final next = app.plan!.days[app.todayIndex + 1].dayName;
+    expect(find.text(today), findsOneWidget);
+    expect(find.text(next), findsNothing);
+    await tester.tap(find.text(next.substring(0, 3)));
+    await tester.pumpAndSettle();
+    expect(find.text(next), findsOneWidget);
+    expect(find.text('Amounts and totals for all 2 of you'), findsOneWidget);
+
+    await tester.tap(find.text('Household').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Already at home'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'salt');
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilterChip, 'Salt'));
+    await tester.pumpAndSettle();
+    expect(app.profile.pantry, contains('salt'));
   });
 
 }
